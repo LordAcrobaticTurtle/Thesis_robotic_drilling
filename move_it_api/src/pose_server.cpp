@@ -1,28 +1,25 @@
 #include "ros/ros.h"
-// #include "std_srvs/Empty.h"
 #include <sstream>
 #include <fstream>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
+#include <move_it_api/pose_server.h>
+#include <std_msgs/Bool.h>
 
 geometry_msgs::Pose target;
 
 static const std::string model_path = "/home/mtrn4230/lab_demo_repos/lab09_demo/lab09_gazebo/models/box/box.sdf";
 static const std::string PLANNING_GROUP = "manipulator";
 
-bool movePose(geometry_msgs::Pose &req, 
-              geometry_msgs::Pose &res) 
-            {
-                ROS_INFO("%f, %f, %f", req.position.x, req.position.y, req.position.z);
-                // ROS_INFO("Gripper %s", req.gripper ? "on" : "off");
-                
-                target = req;
-                // gripper = req.gripper;
-                return true;
-            }
+bool movePose(move_it_api::pose_server::Request &req, move_it_api::pose_server::Response &res) {
+
+    ROS_INFO("%f, %f, %f", req.pose.position.x, req.pose.position.y, req.pose.position.z);
+    target = req.pose;
+    res.success.data = true;
+    return true;
+}
 
 
 int main(int argc, char** argv)
@@ -31,7 +28,8 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, "move_to_pose_server");
     ros::NodeHandle n;
-    
+    ros::ServiceServer service = n.advertiseService("move_to_pose", movePose);
+    // n.advertiseService("move_to_pose",movePose);
     auto spinner = ros::AsyncSpinner(1);
     spinner.start();
 
@@ -42,7 +40,7 @@ int main(int argc, char** argv)
     ROS_INFO("Move to home configuration");
 
     // Options are currently, "zero", "home" and "up"
-    auto group_state = "home";
+    auto group_state = "zero";
     move_group.setNamedTarget(group_state);
     // Check if plan is possible
     auto success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
@@ -53,7 +51,7 @@ int main(int argc, char** argv)
 
     // Execute motion to home position
     ROS_INFO("Found path to %s, moving robot...", group_state);
-    move_group.move();
+    // move_group.move();
 
 
 
@@ -73,19 +71,17 @@ int main(int argc, char** argv)
     oldTarget.position.y = 0;
     oldTarget.position.z = 0;
 
-
     myQuaternion.setRPY(0,0,0);
     oldTarget.orientation = tf2::toMsg(myQuaternion);
     bool oldGripper = false;
     while (ros::ok()) {
-        ROS_INFO("%f, %f %f", target.position.x, target.position.y, target.position.z);
         if (oldTarget != target) { 
             ROS_INFO("MOVE TO A POSE GOAL...");
             ROS_INFO("%f, %f, %f", target.position.x, target.position.y, target.position.z);
             // Subtract arm pose from target so card spawns and arm pose are aligned. 
-            target.position.x -= 0.8;
-            target.position.y -= 0;
-            target.position.z -= 0.775001;
+            // target.position.x -= 0.8;
+            // target.position.y -= 0;
+            // target.position.z -= 0.775001;
             move_group.setPoseTarget(target);
             success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
             oldTarget = target;

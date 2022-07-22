@@ -23,6 +23,7 @@ find_package(catkin REQUIRED
     tf2_ros
     tf2_eigen
     tf2_geometry_msgs
+    message_generation
 )
 
 find_package(Eigen3 REQUIRED)
@@ -42,6 +43,19 @@ find_package(Boost REQUIRED system filesystem date_time thread)
 # #  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
 # #  DEPENDS system_lib
 # )
+
+add_service_files(
+  FILES
+  pose_server.srv
+)
+
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
 
 catkin_package(
   LIBRARIES
@@ -72,11 +86,11 @@ include_directories(
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-add_executable(${PROJECT_NAME}_server src/pose_server.cpp)
+# add_executable(${PROJECT_NAME}_server src/pose_server.cpp)
 add_executable(${PROJECT_NAME}_client src/pose_client.cpp)
-
-target_link_libraries(${PROJECT_NAME}_server ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
+# add_dependencies(${PROJECT_NAME}_server )
+# target_link_libraries(${PROJECT_NAME}_server ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 target_link_libraries(${PROJECT_NAME}_client ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 # target_link_libraries(${PROJECT_NAME}_client ${catkin_LIBRARIES})
-install(TARGETS ${PROJECT_NAME}_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(TARGETS ${PROJECT_NAME}_client DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+# install(TARGETS ${PROJECT_NAME}_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+# install(TARGETS ${PROJECT_NAME}_client DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -4,9 +4,9 @@
 #include <fstream>
 #include <cstdlib>
 
+#include <move_it_api/pose_server.h>
 // This is for interfacing with Moveit move group
 #include <moveit/move_group_interface/move_group_interface.h>
-
 // These are for the various ROS message formats we need
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
@@ -23,8 +23,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "move_to_pose_client");
     auto nh = ros::NodeHandle{};
 
-    ros::ServiceClient mover = nh.serviceClient<geometry_msgs::Pose>("move_to_pose");
-    
+    ros::ServiceClient mover = nh.serviceClient<move_it_api::pose_server>("move_to_pose");
     geometry_msgs::Pose target;
     target.position.x = atof(argv[1]);
     target.position.y = atof(argv[2]);
@@ -35,11 +34,10 @@ int main(int argc, char** argv)
 
     target.orientation = tf2::toMsg(myQuaternion);
 
-    movement_controller::move_to_pose srv;
+    move_it_api::pose_server srv;
     srv.request.pose = target;
-    srv.request.gripper = atoi(argv[7]);
     if (mover.call(srv)) {
-        ROS_INFO("Response: %d", srv.response.success);
+        ROS_INFO("Response: %d", srv.response.success.data);
     } else {
         ROS_ERROR("Failed to call service move_to_pose");
         return 1;
