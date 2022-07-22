@@ -3,12 +3,14 @@
 # Install URsim
 echo URsim must be installed before running this script.
 echo Have you installed URsim?
-read -p 'Y/N: ' answer
+read -p 'N: ' answer
 echo Your answer was $answer
 
+echo "Edit script if you're ready to rumble."
+echo Exiting
+exit
+
 if [ "$answer" == "N" ]; then
-    echo Exiting
-    exit
 fi
 
 echo Continuing with installation
@@ -48,6 +50,13 @@ git clone https://github.com/ros-planning/panda_moveit_config.git -b melodic-dev
 
 rosdep install -y --from-paths . --ignore-src --rosdistro melodic
 
-cd ~/catkin_ws
-catkin config --extend /opt/ros/${ROS_DISTRO} --cmake-args -DCMAKE_BUILD_TYPE=Release
-catkin build
+sudo apt-get install ros-melodic-moveit-visual-tools
+sudo apt install snapd
+sudo snap install code --classic
+echo 'export PATH=$PATH:/snap/bin' >> ~/.bashrc
+
+# cd ~/catkin_ws
+# catkin config --extend /opt/ros/${ROS_DISTRO} --cmake-args -DCMAKE_BUILD_TYPE=Release
+# catkin build
+
+
