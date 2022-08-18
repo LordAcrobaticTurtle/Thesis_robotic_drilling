@@ -19,3 +19,4 @@ Confirm it is publishing to the right pose topic.
 Be wary of the error_scale value. Larger values will cause angry vibrations
 
 
+To simulate in Gazebo, the corresponding plugin has to be added to the robot's URDF
