@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find cartesian_force_controller)/config/my_example_controller.yaml" command="load"/>
+    <remap from="/my_cartesian_compliance_controller/ft_sensor_wrench" to="/wrench" />
+
+</launch>

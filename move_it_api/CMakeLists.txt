@@ -25,7 +25,6 @@ find_package(catkin REQUIRED
     tf2_geometry_msgs
     message_generation
 )
-
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system filesystem date_time thread)
 ###################################
@@ -87,10 +86,10 @@ include_directories(
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 # add_executable(${PROJECT_NAME}_server src/pose_server.cpp)
-add_executable(${PROJECT_NAME}_client src/pose_client.cpp)
+# add_executable(${PROJECT_NAME}_client src/pose_client.cpp)
 # add_dependencies(${PROJECT_NAME}_server )
 # target_link_libraries(${PROJECT_NAME}_server ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
-target_link_libraries(${PROJECT_NAME}_client ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
+# target_link_libraries(${PROJECT_NAME}_client ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 # target_link_libraries(${PROJECT_NAME}_client ${catkin_LIBRARIES})
 # install(TARGETS ${PROJECT_NAME}_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 # install(TARGETS ${PROJECT_NAME}_client DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
