@@ -1,12 +1,14 @@
 <launch>
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
-  <rosparam file="$(find custom_control)/config/custom_control.yaml" command="load"/>
+  <!-- <rosparam file="$(find custom_control)/config/custom_control.yaml" command="load"/> -->
 
-  <!-- load the controllers -->
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" args="my_cartesian_motion_controller"/>
-    <!-- <remap from="/rosout" to="/ros_out_test" /> -->
+  <!--  load the controllers -->
+  <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="my_cartesian_motion_controller"/> -->
+
+<node name="joy_to_geometry" pkg="custom_control" output="screen" type="joy_to_geometry.py"/>
+<remap from="/my_cartesian_compliance_controller/ft_sensor_wrench" to="/wrench" />
 
   <!-- convert joint states to TF transforms for rviz, etc -->
   <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen" /> -->

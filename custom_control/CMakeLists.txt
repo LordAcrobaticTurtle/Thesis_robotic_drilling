@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(custom_control)
+project(custom_control_lib)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,6 +7,7 @@ project(custom_control)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(catkin REQUIRED COMPONENTS
   controller_manager
   joint_state_controller
@@ -26,9 +27,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES custom_control
-#  CATKIN_DEPENDS controller_manager joint_state_controller robot_state_publisher
+ INCLUDE_DIRS include
+ LIBRARIES custom_control
+ CATKIN_DEPENDS roscpp geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -36,15 +37,51 @@ catkin_package(
 ## Build ##
 ###########
 
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${EIGEN_INCLUDE_DIRS}
+)
+
 catkin_install_python(PROGRAMS scripts/joy_to_geometry.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
+# Declare a C++ library#
+# add_library(${PROJECT_NAME}
+#   src/cartesian_motion_controller.cpp
+#   include/cartesian_motion_controller/cartesian_motion_controller.h
+#   include/cartesian_motion_controller/cartesian_motion_controller.hpp
+# )
+add_library(${PROJECT_NAME}
+  src/myController.cpp
+  include/custom_control/myController.h
 )
 
 
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  Eigen3::Eigen
+)
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING REGEX ".*\\.h(pp)?"
+  PATTERN ".svn" EXCLUDE
+)
+
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+install(FILES
+  cartesian_motion_controller_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

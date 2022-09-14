@@ -23,9 +23,10 @@ def main():
     rate = rospy.Rate(50)
     target.header.frame_id = "base_link"
     scale = 0.01    
-    target.pose.position.x = 0.5
-    target.pose.position.y = 0.5
-    target.pose.position.z = 0.5
+    target.pose.position.x = 0.19
+    target.pose.position.y = 0.518
+    target.pose.position.z = 0.4
+    
 
     pitch_angle = 0
     roll_angle = 0

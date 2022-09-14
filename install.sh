@@ -6,12 +6,12 @@ echo Have you installed URsim?
 read -p 'N: ' answer
 echo Your answer was $answer
 
-echo "Edit script if you're ready to rumble."
-echo Exiting
-exit
+# echo "Edit script if you're ready to rumble."
+# echo Exiting
+# exit
 
-if [ "$answer" == "N" ]; then
-fi
+# if [ "$answer" == "N" ]; then
+# fi
 
 echo Continuing with installation
 
