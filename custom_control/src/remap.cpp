@@ -2,7 +2,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 
 ros::Publisher pub;
- ros::Subscriber sub;
+ros::Subscriber sub;
 // const std_msgs::String::ConstPtr&
 void topicCallback(const geometry_msgs::WrenchStamped::ConstPtr& data) {
     geometry_msgs::WrenchStamped msg;
