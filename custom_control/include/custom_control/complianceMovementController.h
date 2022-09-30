@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <geometry_msgs/PoseStamped.h>
-
+#include <sensor_msgs/JointState.h>
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
 namespace thesis {
@@ -22,11 +22,12 @@ namespace thesis {
             state m_state;
             // Publisher to target frame
             ros::Publisher m_pubTargetFrame;
+            geometry_msgs::PoseStamped m_targetFrame;
             // Publisher to target wrench
             ros::Publisher m_pubTargetWrench;
-            
+            geometry_msgs::WrenchStamped m_targetWrench;
             // How to decouple 
-
+            
             // Wrench callback + data
             ros::Subscriber m_subWrench;
             void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr& data);

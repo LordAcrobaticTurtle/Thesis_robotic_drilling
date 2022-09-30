@@ -11,7 +11,8 @@ int main(int argc, char ** argv) {
     }
     ros::init(argc,argv,"cmc_node");
     ros::NodeHandle nh;
-    thesis::cmc ctrl(nh, (thesis::cmc::state) atoi(argv[1]));
+    thesis::cmc ctrl(nh);
+    ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
     ros::spin();
     ROS_INFO("Program exit");
     return 0;   
