@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(custom_control_lib)
+project(custom_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -85,3 +85,6 @@ install(FILES
   cartesian_motion_controller_plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+add_executable(remap src/remap.cpp)
+target_link_libraries(remap ${catkin_LIBRARIES})
