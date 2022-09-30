@@ -7,19 +7,32 @@
 namespace thesis {
     class complianceMovementController {
         public:
-            complianceMovementController();
+            enum state {
+                ZERO,
+                GENERAL   
+            };
+            complianceMovementController(ros::NodeHandle &p_nh);
+            complianceMovementController(ros::NodeHandle &p_nh, state p_state);
             ~complianceMovementController();
-
-            void setMode(/*ENUM INDICATING STATE*/)
+            void setMode(state p_state);
 
         private:
+            // Nodehandle
+            ros::NodeHandle m_nh;
+            state m_state;
             // Publisher to target frame
-            ros::Publisher pubTargetFrame;
+            ros::Publisher m_pubTargetFrame;
             // Publisher to target wrench
-            ros::Publisher pubTargetWrench;
-            // Subscriber to wrench
-            ros::Subscriber subWrench;
+            ros::Publisher m_pubTargetWrench;
+            
+            // How to decouple 
 
+            // Wrench callback + data
+            ros::Subscriber m_subWrench;
+            void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr& data);
+            geometry_msgs::WrenchStamped::ConstPtr msgWrenchStamped;
+
+            void main();
             
     };
     typedef complianceMovementController cmc;

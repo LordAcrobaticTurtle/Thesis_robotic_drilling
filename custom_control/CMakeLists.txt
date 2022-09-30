@@ -88,3 +88,7 @@ install(FILES
 
 add_executable(remap src/remap.cpp)
 target_link_libraries(remap ${catkin_LIBRARIES})
+
+
+add_executable(cmc src/main.cpp src/complianceMovementController.cpp)
+target_link_libraries(cmc ${catkin_LIBRARIES})
