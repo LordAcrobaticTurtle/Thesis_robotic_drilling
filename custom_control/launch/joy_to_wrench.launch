@@ -1,0 +1,18 @@
+<launch>
+        <!-- Spacenav driver node -->
+        <node pkg="joy" type="joy_node" name="joy_node" output="screen">
+                <!-- <param name="zero_when_static" value="true"/>
+                <param name="static_count_threshold" value="30"/>
+                <rosparam param="linear_scale">[50,50,50]</rosparam>
+                <rosparam param="angular_scale">[5,5,5]</rosparam> -->
+        </node>
+
+        <!-- Republish twists as wrenches -->
+        <node name="joy_to_wrench" pkg="custom_control" type="JoystickToWrench.py" output="screen">
+                <param name="pose_topic" value="/my_cartesian_compliance_controller/target_frame"/>
+                <param name="wrench_topic" value="/my_cartesian_compliance_controller/target_wrench"/>
+                <param name="joy_topic" value="/joy"/>
+                <param name="frame_id" value="base_link"/>
+                <param name="publishing_rate" value="50"/>
+        </node>
+</launch>
