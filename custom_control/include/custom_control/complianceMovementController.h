@@ -19,14 +19,21 @@ namespace thesis {
         private:
             // Nodehandle
             ros::NodeHandle m_nh;
+            ros::Rate rate;
             state m_state;
+            
             // Publisher to target frame
             ros::Publisher m_pubTargetFrame;
             geometry_msgs::PoseStamped m_targetFrame;
+            
             // Publisher to target wrench
             ros::Publisher m_pubTargetWrench;
             geometry_msgs::WrenchStamped m_targetWrench;
-            // How to decouple 
+
+            geometry_msgs::PoseStamped m_home;
+            geometry_msgs::PoseStamped m_currPose;
+            geometry_msgs::WrenchStamped m_currWrench;
+
             
             // Wrench callback + data
             ros::Subscriber m_subWrench;

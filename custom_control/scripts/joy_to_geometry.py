@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from lib2to3.pytree import convert
 import rospy
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import PoseStamped

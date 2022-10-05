@@ -1,7 +1,9 @@
 #include <custom_control/complianceMovementController.h>
-
+#include <cmath>
 namespace thesis {
-    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) {
+    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) :
+        rate(100)
+     {
         ROS_INFO("CMC constructed");
         m_nh = p_nh;
         std::string controllerName = "/my_cartesian_compliance_controller/";
@@ -11,6 +13,21 @@ namespace thesis {
 
         m_targetFrame.header.frame_id = "base_link";
         m_targetWrench.header.frame_id = "base_link";
+        
+        m_home.pose.position.x = 0.459;
+        m_home.pose.position.y = 0.200;
+        m_home.pose.position.z = 0.300;
+
+        m_currPose.header.frame_id = "base_link";
+        m_currPose = m_home;
+
+        m_currWrench.header.frame_id = "base_link";
+        m_currWrench.wrench.force.x = 0;
+        m_currWrench.wrench.force.y = 0;
+        m_currWrench.wrench.force.z = 0;
+        m_currWrench.wrench.torque.x = 0;
+        m_currWrench.wrench.torque.y = 0;
+        m_currWrench.wrench.torque.z = 0;
 
         // Jump into main loop
         main();
@@ -36,22 +53,15 @@ namespace thesis {
 
 
     void cmc::main() {
+        int i = 0;
+        double j = 0.0;
+        // All commands must be passed in as metres
         while (ros::ok()) {
-            // Set position commands see what happens
-            geometry_msgs::Point targetPoint;
-            targetPoint.x = 0;
-            targetPoint.y = 0;
-            targetPoint.z = 0;
-            
-            m_targetFrame.pose.position = targetPoint;
-            ROS_INFO("Publsihing target frame");
-            m_pubTargetFrame.publish(m_targetFrame);
-
-            m_targetWrench.wrench.force.z = 0;
-            m_targetWrench.wrench.force.x = 1;
-            m_targetWrench.wrench.force.y = 0;
-
-            m_pubTargetWrench.publish(m_targetWrench);
+            ROS_INFO("sin(j)= %f", sin(j));
+            // m_pubTargetFrame.publish(m_targetFrame);
+            // m_pubTargetWrench.publish(m_targetWrench);
+            j += 0.05;
+            rate.sleep();
         }
     }
 
