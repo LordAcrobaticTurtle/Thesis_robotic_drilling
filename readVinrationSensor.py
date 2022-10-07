@@ -34,9 +34,14 @@ def main(args):
     while recordTime - (time.time()-initTime) > 0:
         # Arduino gets reset everytime COM port is opened.
         # ypr is always the first line, accel is always the second
-        line1 = port.readline().decode().strip()
-        line2 = port.readline().decode().strip()
-
+        line1 = str()
+        line2 = str()
+        try:
+            line1 = port.readline().decode().strip()
+            line2 = port.readline().decode().strip()
+        except UnicodeDecodeError:
+            print("Error decoding")
+        
         print(line1)
         print(line2)
 
@@ -52,7 +57,7 @@ def main(args):
         # Convert data to list of units
         listData = data.split('\t')
         print(listData)
-        
+
 
         remove_element('quat',listData)
         remove_element('areal',listData)
