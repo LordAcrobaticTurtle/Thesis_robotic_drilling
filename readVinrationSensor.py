@@ -1,10 +1,15 @@
-from multiprocessing.sharedctypes import Value
 import time
 import datetime
 import serial
 import csv
 import time
 import argparse
+
+def remove_element(name : str, data : list):
+    try:
+        data.remove(name)
+    except ValueError:
+        print(f"No element: {name} in this string")
 
 
 def main(args):
@@ -29,36 +34,31 @@ def main(args):
     while recordTime - (time.time()-initTime) > 0:
         # Arduino gets reset everytime COM port is opened.
         # ypr is always the first line, accel is always the second
-        ypr = port.readline().decode().strip()
-        accel = port.readline().decode().strip()
+        line1 = port.readline().decode().strip()
+        line2 = port.readline().decode().strip()
+
+        print(line1)
+        print(line2)
+
         # Check each string, confirm they are whaat I expect
         # Take first three leters of ypr string. If it matches ypr, leave it in order, if it doesn't swap them over.
 
-        if (ypr[0:3] == 'ypr'):
+        if (line1[0:4] == 'quat'):
             print("You have correct order")
-            data = ypr + "\t" + accel
+            data = line1 + "\t" + line2
         else:
             print ("you have reveresed order")
-            data = accel + "\t" + ypr
+            data = line2 + "\t" + line1
         # Convert data to list of units
         listData = data.split('\t')
         print(listData)
         
-        try:
-            listData.remove('ypr')
-        except ValueError:
-            print("No element: ypr is this string")
 
-        try:    
-            listData.remove('areal')
-        except ValueError:
-            print("There is no element \"areal\"")
-
-        try:
-            listData.remove('aworld')
-        except ValueError:
-            print("There is no element: \"aworld\"")
-            
+        remove_element('quat',listData)
+        remove_element('areal',listData)
+        remove_element('aworld', listData)
+        remove_element('ypr',listData)
+        
         print(listData)
         writer.writerow(listData)
 
