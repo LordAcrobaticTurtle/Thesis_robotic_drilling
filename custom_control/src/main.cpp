@@ -4,6 +4,7 @@
 
 #define NUMARGUMENTS 2
 
+
 int main(int argc, char ** argv) {
     if (argc < NUMARGUMENTS) {
         ROS_INFO("Usage: ./exe <mode (0/1)>");
@@ -13,7 +14,7 @@ int main(int argc, char ** argv) {
     ros::NodeHandle nh;
     thesis::cmc ctrl(nh);
     ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
-    ros::spin();
+    ctrl.main();
     ROS_INFO("Program exit");
     return 0;   
 }

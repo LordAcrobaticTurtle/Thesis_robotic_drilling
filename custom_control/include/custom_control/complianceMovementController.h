@@ -15,11 +15,12 @@ namespace thesis {
             complianceMovementController(ros::NodeHandle &p_nh, state p_state);
             ~complianceMovementController();
             void setMode(state p_state);
+            void main();
 
         private:
             // Nodehandle
             ros::NodeHandle m_nh;
-            ros::Rate rate;
+            ros::Rate m_rate;
             state m_state;
             
             // Publisher to target frame
@@ -34,13 +35,13 @@ namespace thesis {
             geometry_msgs::PoseStamped m_currPose;
             geometry_msgs::WrenchStamped m_currWrench;
 
-            
             // Wrench callback + data
             ros::Subscriber m_subWrench;
             void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr& data);
-            geometry_msgs::WrenchStamped::ConstPtr msgWrenchStamped;
+            geometry_msgs::WrenchStamped::ConstPtr m_currWrenchMsg;
 
-            void main();
+            int m_rateHz = 100;
+            
             
     };
     typedef complianceMovementController cmc;

@@ -13,8 +13,8 @@
   <!-- <node name="controller_starter" pkg="controller_manager" type="controller_manager" respawn="false" 
     output="screen" args="start my_cartesian_force_controller"/> -->
 
-  <node name="controller_starter" pkg="controller_manager" type="controller_manager" respawn="false" 
-    output="screen" args="spawn my_cartesian_force_controller"/>
+  <!-- <node name="controller_starter" pkg="controller_manager" type="controller_manager" respawn="false" 
+    output="screen" args="spawn my_cartesian_compliance_controller"/> -->
   
 <!-- <node name="joy_to_geometry" pkg="custom_control" output="screen" type="joy_to_geometry.py"/> -->
 
