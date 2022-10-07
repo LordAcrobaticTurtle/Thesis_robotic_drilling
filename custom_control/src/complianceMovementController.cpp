@@ -1,9 +1,7 @@
 #include <custom_control/complianceMovementController.h>
 #include <cmath>
 namespace thesis {
-    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) :
-        m_rate(100)
-     {
+    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) {
         ROS_INFO("CMC constructed");
         m_nh = p_nh;
         std::string controllerName = "/my_cartesian_compliance_controller/";
@@ -30,6 +28,7 @@ namespace thesis {
         m_currWrench.wrench.torque.y = 0;
         m_currWrench.wrench.torque.z = 0;
 
+        m_timer = m_nh.createTimer(ros::Duration(1/m_rateHz), &cmc::main,this);
         // Jump into main loop
     };
 
@@ -55,41 +54,89 @@ namespace thesis {
     }
 
 
-    void cmc::main() {
-        int i = 0;
-        double j = 0.0;
-        ROS_INFO("RUNNING - CMC main");
+
+    void cmc::main(const ros::TimerEvent &t) {
+        static double j = 0.0;
+        static bool isAppRunning = true;
+        // ROS_INFO("RUNNING - CMC main");
+        
+        if (!isAppRunning) {
+            ROS_INFO("SHUTDOWN - CMC main");
+            m_pubTargetFrame.publish(m_home);
+            return;
+        }
 
         // All commands must be passed in as metres
-        while (ros::ok()) {
-            // m_pubTargetWrench.publish(m_targetWrench);
-            // We have a constant publisher here.
-            m_targetFrame = m_currPose;
-            m_targetFrame.pose.position.z = -0.25*sin(j)+0.25;
-            // 2 N gate
-            m_pubTargetFrame.publish(m_targetFrame);
-            
-            std::cout << m_targetFrame << std::endl;
-            
-            if (abs(m_currWrench.wrench.force.z) >= 5.0) 
-                break;
-
-            j += 0.001;
-            m_rate.sleep();
-            ros::spinOnce();
-
-        }
+    
+        // m_pubTargetWrench.publish(m_targetWrench);
+        // We have a constant publisher here.
+        m_targetFrame = m_currPose;
+        m_targetFrame.pose.position.z = 0.25*sin(j)+0.3;
+        // 2 N gate
+        double response = PID(-5,m_currWrench.wrench.force.z);
+        m_targetWrench.wrench.force.z = response;
         
-        ROS_INFO("Moving to home");
-        m_pubTargetFrame.publish(m_home);
-        ros::spinOnce();
+        
+
+        if (abs(m_currWrench.wrench.force.z) >= 20.0) {
+            isAppRunning = false;
+            return;
+        }
+
+        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, response);
 
         std::cout << m_targetFrame << std::endl;
-        ROS_INFO("EXITING - CMC main");
+        
+        m_targetWrench.header.frame_id = "base_link";
+        m_pubTargetWrench.publish(m_targetWrench);
+        // m_pubTargetFrame.publish(m_targetFrame);
+        j += 0.00025;
+
+        int i = 0;
+        
+        // std::cout << m_targetFrame << std::endl;
+        // ROS_INFO("EXITING - CMC main");
     }
 
 
+    double cmc::PID(double setpoint, double currValue) {
+        static double prevError = 0;
+        static double iSum = 0;
+        static double iMax = 5.0;
+        static double iMin = -iMax;
+        static double PIDmax = 20;
+        static double PIDmin = -PIDmax;
+        double dt = 1.0/m_rateHz;
 
+        // Calculate quantities
+        double perror = setpoint - currValue;
+        double derror = (perror-prevError) / dt;
+        iSum += perror*dt;
+
+        if (iSum > iMax)
+            iSum = iMax;
+        else if (iSum < iMin) 
+            iSum = iMin;
+        
+        // Multipy by gains
+        double pOut = m_kp*perror;
+        double dOut = m_kd*derror;
+        double iOut = m_ki*iSum;
+
+        // Calculate result
+        double result = pOut + iOut;
+
+        // Prevent windup
+        if (result > PIDmax) 
+            result = PIDmax;
+        else if (result < PIDmin)
+            result = PIDmin;
+        
+        // Set error for next loop
+        prevError = perror;
+
+        return result;
+    }
 
 
     

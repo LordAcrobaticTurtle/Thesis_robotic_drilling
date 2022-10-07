@@ -2,6 +2,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/JointState.h>
+#include <ros/timer.h>
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
 namespace thesis {
@@ -15,12 +16,14 @@ namespace thesis {
             complianceMovementController(ros::NodeHandle &p_nh, state p_state);
             ~complianceMovementController();
             void setMode(state p_state);
-            void main();
+            void main(const ros::TimerEvent &t);
 
         private:
+
+
             // Nodehandle
             ros::NodeHandle m_nh;
-            ros::Rate m_rate;
+            // ros::Rate m_rate;
             state m_state;
             
             // Publisher to target frame
@@ -40,7 +43,13 @@ namespace thesis {
             void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr& data);
             geometry_msgs::WrenchStamped::ConstPtr m_currWrenchMsg;
 
-            int m_rateHz = 100;
+            double PID(double setpoint, double currentValue);
+            double m_kp = 10;
+            double m_kd = 1;
+            double m_ki = 0.1;
+
+            ros::Timer m_timer;
+            float m_rateHz = 100;
             
             
     };

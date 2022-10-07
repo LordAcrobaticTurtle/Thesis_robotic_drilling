@@ -2,7 +2,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <custom_control/complianceMovementController.h>
 
-#define NUMARGUMENTS 2
+#define NUMARGUMENTS 1
 
 
 int main(int argc, char ** argv) {
@@ -14,7 +14,11 @@ int main(int argc, char ** argv) {
     ros::NodeHandle nh;
     thesis::cmc ctrl(nh);
     ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
-    ctrl.main();
+    ros::AsyncSpinner spin(4);
+    spin.start();
+
+    while (ros::ok()) ;
+
     ROS_INFO("Program exit");
     return 0;   
 }
