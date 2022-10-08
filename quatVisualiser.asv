@@ -1,0 +1,13 @@
+dims = size(IMU);
+
+% Graph the original vector.
+quatPlot = quiver3(0,0,0,0,0,1);
+initVector = [0,0,0,1];
+
+% Use hamiltonian product
+% P' = RPR'
+currQuat = [];
+oldQuat = initVector;
+for i=1:dims(1)
+   currQuat = [IMU[i,1], IMU[i,2], IMU[i,3], IMU[i,4]]
+end 
