@@ -1,0 +1,5 @@
+<library path="lib/libcustom_control_lib" />
+    <class name ="custom_control/MyController"
+            type= "controller_ns::MyController"
+            base_class_type="controller_interface::ControllerBase"/>
+</library>

@@ -10,14 +10,20 @@ int main(int argc, char ** argv) {
         ROS_INFO("Usage: ./exe <mode (0/1)>");
         return -1;
     }
+
     ros::init(argc,argv,"cmc_node");
     ros::NodeHandle nh;
+    ros::Rate rate(50);
     thesis::cmc ctrl(nh);
-    ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
+    // ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
     ros::AsyncSpinner spin(4);
     spin.start();
 
-    while (ros::ok()) ;
+    while (ros::ok()) {
+        ctrl.m_joyHandle.publish();
+        // joyCtrl.publish();
+        rate.sleep();
+    };
 
     ROS_INFO("Program exit");
     return 0;   

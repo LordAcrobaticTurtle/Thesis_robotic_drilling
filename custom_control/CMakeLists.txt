@@ -90,6 +90,7 @@ add_executable(remap src/remap.cpp)
 target_link_libraries(remap ${catkin_LIBRARIES})
 
 
-add_executable(cmc src/main.cpp src/complianceMovementController.cpp)
+add_executable(cmc src/main.cpp src/complianceMovementController.cpp src/joystick.cpp)
 target_link_libraries(cmc ${catkin_LIBRARIES})
+
 # add_dependencies(cmc geometry_msgs)

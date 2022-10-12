@@ -3,6 +3,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/JointState.h>
 #include <ros/timer.h>
+#include "custom_control/joystick.h"
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
 namespace thesis {
@@ -17,10 +18,9 @@ namespace thesis {
             ~complianceMovementController();
             void setMode(state p_state);
             void main(const ros::TimerEvent &t);
+            joystick m_joyHandle;
 
         private:
-
-
             // Nodehandle
             ros::NodeHandle m_nh;
             // ros::Rate m_rate;
@@ -47,9 +47,10 @@ namespace thesis {
             double m_kp = 10;
             double m_kd = 1;
             double m_ki = 0.1;
-
             ros::Timer m_timer;
-            float m_rateHz = 100;
+            
+            // FIX FOR FRIDAY
+            float m_rateHz = 50 ;
             
             
     };
