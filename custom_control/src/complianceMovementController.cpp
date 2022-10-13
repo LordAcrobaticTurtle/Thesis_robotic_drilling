@@ -73,11 +73,10 @@ namespace thesis {
         m_targetFrame = m_currPose;
         m_targetFrame.pose.position.z = 0.25*sin(j)+0.3;
         // 2 N gate
-        double response = PID(-5,m_currWrench.wrench.force.z);
+        double response = PID(0,m_currWrench.wrench.force.z);
         m_targetWrench.wrench.force.z = response;
         
         
-
         if (abs(m_currWrench.wrench.force.z) >= 20.0) {
             isAppRunning = false;
             return;
