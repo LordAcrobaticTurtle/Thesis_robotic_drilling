@@ -1,24 +1,28 @@
 #include <custom_control/complianceMovementController.h>
 #include <cmath>
 namespace thesis {
-    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) {
+    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) : m_joyHandle(p_nh) {
         ROS_INFO("CMC constructed");
         m_nh = p_nh;
         std::string controllerName = "/my_cartesian_compliance_controller/";
         m_pubTargetFrame = m_nh.advertise<geometry_msgs::PoseStamped>(controllerName + "target_frame",1000);
         m_pubTargetWrench = m_nh.advertise<geometry_msgs::WrenchStamped>(controllerName + "target_wrench",1000);
-        m_subWrench = m_nh.subscribe<geometry_msgs::WrenchStamped>("/wrench",1000,&complianceMovementController::wrenchCallback,this);
+        m_subWrench = m_nh.subscribe<geometry_msgs::WrenchStamped>(controllerName + "ft_sensor_wrench",1000,&complianceMovementController::wrenchCallback,this);
 
         m_targetFrame.header.frame_id = "base_link";
         m_targetWrench.header.frame_id = "base_link";
         
         // ADJUST HOME POSITION
-        m_home.pose.position.x = 0.459;
-        m_home.pose.position.y = 0.200;
-        m_home.pose.position.z = 0.200;
-
+        m_home.pose.position.x = 0.-459;
+        m_home.pose.position.y = 0.-200;
+        m_home.pose.position.z = 0.300;
+        m_home.pose.orientation.w = 0;
+        m_home.pose.orientation.x = 1;
+        m_home.pose.orientation.y = 0;
+        m_home.pose.orientation.z = 0;
+        
         m_currPose = m_home;
-
+        m_home.header.frame_id = "base_link";
         m_currPose.header.frame_id = "base_link";
         m_currWrench.header.frame_id = "base_link";
         m_currWrench.wrench.force.x = 0;
@@ -29,6 +33,7 @@ namespace thesis {
         m_currWrench.wrench.torque.z = 0;
 
         m_timer = m_nh.createTimer(ros::Duration(1/m_rateHz), &cmc::main,this);
+
         // Jump into main loop
     };
 
@@ -54,46 +59,46 @@ namespace thesis {
     }
 
 
-
     void cmc::main(const ros::TimerEvent &t) {
         static double j = 0.0;
         static bool isAppRunning = true;
         // ROS_INFO("RUNNING - CMC main");
         
         if (!isAppRunning) {
-            ROS_INFO("SHUTDOWN - CMC main");
+            ROS_INFO("SHUTDOWN - CMC main - Final pos:");
+            std::cout << m_targetFrame << std::endl;
             m_pubTargetFrame.publish(m_home);
             return;
         }
 
-        // All commands must be passed in as metres
-    
-        // m_pubTargetWrench.publish(m_targetWrench);
-        // We have a constant publisher here.
-        m_targetFrame = m_currPose;
-        m_targetFrame.pose.position.z = 0.25*sin(j)+0.3;
-        // 2 N gate
-        double response = PID(0,m_currWrench.wrench.force.z);
+        m_targetFrame = m_home;
+
+        double target = 0;
+
+        // Check if Joystick values exist for setpoint
+        if (m_joyHandle.m_joyState.axes.size() > 0) {
+            target = 20*m_joyHandle.m_joyState.axes[1];
+        }
+        
+        // Calculate response and setup wrench data struct
+        double response = PID(target,m_currWrench.wrench.force.z);
         m_targetWrench.wrench.force.z = response;
-        
-        
-        if (abs(m_currWrench.wrench.force.z) >= 20.0) {
+        m_targetWrench.header.stamp = ros::Time::now();
+        m_targetWrench.header.frame_id = "base_link";
+
+        // If force exceeds 25N exit the loop
+        if (abs(m_currWrench.wrench.force.z) >= 25.0) {
             isAppRunning = false;
             return;
         }
 
-        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, response);
+        // ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, response);
 
-        std::cout << m_targetFrame << std::endl;
         
-        m_targetWrench.header.frame_id = "base_link";
         m_pubTargetWrench.publish(m_targetWrench);
-        // m_pubTargetFrame.publish(m_targetFrame);
+        m_pubTargetFrame.publish(m_targetFrame);
         j += 0.00025;
 
-        int i = 0;
-        
-        // std::cout << m_targetFrame << std::endl;
         // ROS_INFO("EXITING - CMC main");
     }
 

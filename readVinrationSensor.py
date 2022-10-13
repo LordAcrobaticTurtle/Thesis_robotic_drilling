@@ -29,7 +29,7 @@ def main(args):
         continue
 
     initTime = time.time()
-    header = ['y', 'p' ,'r', 'ax', 'ay' ,'az']
+    header = ['w', 'x' ,'y', 'z', 'ax', 'ay' ,'az']
     writer.writerow(header)
     while recordTime - (time.time()-initTime) > 0:
         # Arduino gets reset everytime COM port is opened.
