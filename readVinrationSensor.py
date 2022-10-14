@@ -14,11 +14,10 @@ def remove_element(name : str, data : list):
 
 def main(args):
     print(args)
-    recordTime = 0
+    recordTime = args.t
     if args.t is None:
         print("Default time: 10s")
         recordTime = 10
-    recordTime = args.t
     now = datetime.datetime.now()
     dateAndTime = now.strftime('%d-%m-%y-%H-%M-%S')
     filecsv = open('log_data/'+dateAndTime+'.csv', 'w')
@@ -29,11 +28,11 @@ def main(args):
         continue
 
     initTime = time.time()
-    header = ['w', 'x' ,'y', 'z', 'ax', 'ay' ,'az']
+    header = ['t', 'w', 'x' ,'y', 'z', 'ax', 'ay' ,'az']
     writer.writerow(header)
+    counter = 0
     while recordTime - (time.time()-initTime) > 0:
         # Arduino gets reset everytime COM port is opened.
-        # ypr is always the first line, accel is always the second
         line1 = str()
         line2 = str()
         try:
@@ -54,18 +53,18 @@ def main(args):
         else:
             print ("you have reveresed order")
             data = line2 + "\t" + line1
+        
         # Convert data to list of units
         listData = data.split('\t')
-        print(listData)
-
-
         remove_element('quat',listData)
         remove_element('areal',listData)
         remove_element('aworld', listData)
         remove_element('ypr',listData)
-        
-        print(listData)
-        writer.writerow(listData)
+        prependedList = [counter] + listData
+        print(prependedList)
+        writer.writerow(prependedList)
+        counter += 1
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('pos_arg', type=str, help='Which com port do you want to connect to?')

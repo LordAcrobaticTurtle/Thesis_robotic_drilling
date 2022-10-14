@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   robot_state_publisher
   sensor_msgs
   geometry_msgs
+  tf 
+  tf2
 )
 
 
@@ -29,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES custom_control
- CATKIN_DEPENDS roscpp geometry_msgs
+ CATKIN_DEPENDS roscpp geometry_msgs tf tf2 
 #  DEPENDS system_lib
 )
 
@@ -55,36 +57,9 @@ catkin_install_python(PROGRAMS scripts/joy_to_geometry.py
 #   include/cartesian_motion_controller/cartesian_motion_controller.h
 #   include/cartesian_motion_controller/cartesian_motion_controller.hpp
 # )
-add_library(${PROJECT_NAME}
-  src/myController.cpp
-  include/custom_control/myController.h
-)
-
-
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-  Eigen3::Eigen
-)
-
-install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING REGEX ".*\\.h(pp)?"
-  PATTERN ".svn" EXCLUDE
-)
-
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(FILES
-  cartesian_motion_controller_plugin.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+
 
 add_executable(remap src/remap.cpp)
 target_link_libraries(remap ${catkin_LIBRARIES})

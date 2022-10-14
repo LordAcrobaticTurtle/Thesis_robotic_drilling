@@ -2,25 +2,35 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <custom_control/complianceMovementController.h>
 
-#define NUMARGUMENTS 1
+#define NUMARGUMENTS 2
 
 
 int main(int argc, char ** argv) {
     if (argc < NUMARGUMENTS) {
-        ROS_INFO("Usage: ./exe <mode (0/1)>");
+        ROS_INFO("Usage: ./exe <depth=x (mm)>");
         return -1;
     }
-
+    // They should be on parameter server
+    float depth = atof(argv[1]);
+    if (depth <= 0) {
+        ROS_INFO("Invalid depth");
+        return -1;
+    }
+    // init ros
     ros::init(argc,argv,"cmc_node");
     ros::NodeHandle nh;
-    ros::Rate rate(50);
-    thesis::cmc ctrl(nh);
-    // ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
+    // Init spinners
     ros::AsyncSpinner spin(4);
     spin.start();
+    
+    thesis::cmc ctrl(nh, depth);
+    
+    ros::Rate rate(ctrl.get_mRateHz());
+    // ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
+    
 
     while (ros::ok()) {
-        ctrl.m_joyHandle.publish();
+        // ctrl.m_joyHandle.publish();
         // joyCtrl.publish();
         rate.sleep();
     };
