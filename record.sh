@@ -1,0 +1,1 @@
+rosbag record joint_states my_cartesian_compliance_controller/target_frame my_cartesian_compliance_controller/target_wrench wrench

@@ -17,7 +17,7 @@ def main(args):
     recordTime = args.t
     if args.t is None:
         print("Default time: 10s")
-        recordTime = 10
+        recordTime = 1000
     now = datetime.datetime.now()
     dateAndTime = now.strftime('%d-%m-%y-%H-%M-%S')
     filecsv = open('log_data/'+dateAndTime+'.csv', 'w')

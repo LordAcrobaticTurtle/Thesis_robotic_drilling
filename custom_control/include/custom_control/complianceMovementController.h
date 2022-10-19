@@ -9,6 +9,8 @@
 #include <tf2/convert.h>
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
+#define TOLERANCE 0.01
+
 namespace thesis {
     class complianceMovementController {
         public:
@@ -43,8 +45,9 @@ namespace thesis {
             geometry_msgs::PoseStamped m_home;
             geometry_msgs::PoseStamped m_currPose;
             geometry_msgs::WrenchStamped m_currWrench;
-            tf::TransformListener m_listener;
-            tf::StampedTransform m_transform;
+            tf2_ros::Buffer m_tfBuffer;
+            tf2_ros::TransformListener m_listener;
+
             // Wrench callback + data
             ros::Subscriber m_subWrench;
             void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr& data);
@@ -55,6 +58,10 @@ namespace thesis {
             double m_kd = 1;
             double m_ki = 0.1;
             ros::Timer m_timer;
+            
+            const float m_stiffnessX = 500.0;
+            const float m_stiffnessY = 500.0;
+            const float m_stiffnessZ = 500.0;
             
             // FIX FOR FRIDAY
             float m_rateHz = 50 ;
