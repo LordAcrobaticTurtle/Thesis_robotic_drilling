@@ -1,5 +1,6 @@
 #include <cmath>
-
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <custom_control/complianceMovementController.h>
 
 
@@ -17,9 +18,23 @@ namespace thesis {
         m_targetWrench.header.frame_id = "base_link";
         
         // ADJUST HOME POSITION
-        m_home.pose.position.x = 0.487;
-        m_home.pose.position.y = 0.348;
-        m_home.pose.position.z = 0.239;
+        m_home.pose.position.x = 0.452;
+        m_home.pose.position.y = 0.275;
+        m_home.pose.position.z = 0.307;
+        m_home.pose.orientation.w = 0.7116;
+        m_home.pose.orientation.x = -0.7018;
+        m_home.pose.orientation.y = 0.0273;
+        m_home.pose.orientation.z = -0.016;
+
+        // Calculate initial quaternion
+        // std::cout << m_home.pose.orientation << std::endl;
+        // tf2::Quaternion quat;
+        // quat.setRPY(0.012,-2.189,2.264);
+        // // quat.setRPY(180,0,2.36);
+        // quat.normalize();
+        // tf2::convert(quat, m_home.pose.orientation);
+        // std::cout << m_home.pose.orientation << std::endl;
+
         
         m_currPose = m_home;
         m_home.header.frame_id = "base_link";
@@ -77,19 +92,19 @@ namespace thesis {
         // Calculate response and setup wrench data struct
         // double response = PID(target,m_currWrench.wrench.force.z);
         
-        m_targetWrench.wrench.force.z = 0;
+        m_targetWrench.wrench.force.y = 0;
         m_targetWrench.header.stamp = ros::Time::now();
         m_targetWrench.header.frame_id = "base_link";
         
         m_targetFrame.pose.position.z = m_targetFrame.pose.position.z - m_targetDepth;
         
         // If force exceeds 25N exit the loop
-        if (abs(m_currWrench.wrench.force.z) >= 25.0) {
+        if (abs(m_currWrench.wrench.force.y) >= 25.0) {
             isAppRunning = false;
             return;
         }
 
-        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, 0.0);
+        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.y, 0.0);
         // Can estimate currPose based on targetFrame and force + stiffness values
         
         m_pubTargetWrench.publish(m_targetWrench);
@@ -102,10 +117,12 @@ namespace thesis {
     void cmc::homing() {
         // Drive until spike in force.
         // Measure force in each direction and change setpoint to be the difference using spring relationship
+
+        // Hacking the mainframe. Read forces in Y, command positions in Z.
         static bool isHomeFound = false;
         const float stiffnessX = 2500.0;
-        const float stiffnessY = 2500.0;
-        const float stiffnessZ = 500.0;
+        const float stiffnessY = 500.0;
+        const float stiffnessZ = 2500.0;
         ros::Rate rate(100);
         float j = 0;
         geometry_msgs::WrenchStamped spikeMeasurements;
@@ -118,7 +135,7 @@ namespace thesis {
             m_targetFrame.pose.position.z = -0.5*sin(j)+m_home.pose.position.z;
             ROS_INFO("m_targetFrame z: %f", m_targetFrame.pose.position.z);
             
-            if (abs(m_currWrench.wrench.force.z) >= 10.0) {
+            if (abs(m_currWrench.wrench.force.y) >= 10.0) {
                 // Take measurements of each force + torque axis
                 spikeMeasurements = m_currWrench;
                 break;
@@ -133,21 +150,22 @@ namespace thesis {
         }
         
         // Calculate deviation
-        deviation.position.x = m_currWrench.wrench.force.x/stiffnessX; 
-        deviation.position.y = m_currWrench.wrench.force.y/stiffnessY; 
-        deviation.position.z = m_currWrench.wrench.force.z/stiffnessZ; 
+        // deviation.position.x = m_currWrench.wrench.force.x/stiffnessX; 
+        // deviation.position.y = m_currWrench.wrench.force.y/stiffnessY; 
+        // deviation.position.z = m_currWrench.wrench.force.z/stiffnessZ; 
+        deviation.position.z = m_currWrench.wrench.force.y/stiffnessZ;
         std::cout << deviation << std::endl;
         // 
         // Convert TCP frame to base frame
         
         // m_targetFrame.pose.position.x -= deviation.position.y;
         // m_targetFrame.pose.position.y -= deviation.position.x;
+        
         m_targetFrame.pose.position.z -= deviation.position.z;
         m_pubTargetFrame.publish(m_targetFrame);
         std::cout << m_targetFrame << std::endl;
 
-        // Publish deviation to arm 
-        while(ros::ok()) {};
+        // Homing works with drill on
     }
 
 
