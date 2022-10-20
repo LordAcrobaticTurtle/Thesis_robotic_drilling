@@ -1,1 +1,1 @@
-roslaunch ur_robot_driver ur5e_bringup.launch robot_ip:=192.168.0.100 kinematics_config:=/home/mtrn4230/repos/Thesis_robotic_drilling/calibration.yaml
+roslaunch ur_robot_driver ur5e_bringup.launch robot_ip:=192.168.0.100 kinematics_config:="/home/mtrn4230/repos/Thesis_robotic_drilling/ur5e_calibration.yaml"

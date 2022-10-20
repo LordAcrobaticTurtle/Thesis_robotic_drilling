@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <custom_control/complianceMovementController.h>
-
+#include "custom_control/jointTrajectoryController.h"
 #define NUMARGUMENTS 2
 
 
@@ -24,14 +24,15 @@ int main(int argc, char ** argv) {
     spin.start();
     
     thesis::cmc ctrl(nh, depth);
+    thesis::jointTrajectoryController ctl(nh);
     
     ros::Rate rate(ctrl.get_mRateHz());
     // ctrl.setMode((thesis::cmc::state) atoi(argv[1]));
-    
 
     while (ros::ok()) {
         // ctrl.m_joyHandle.publish();
         // joyCtrl.publish();
+        ctl.get_mRateHz();
         rate.sleep();
     };
 
