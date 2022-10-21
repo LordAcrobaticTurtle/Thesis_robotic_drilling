@@ -1,3 +1,4 @@
+#pragma once
 #include <ros/ros.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <geometry_msgs/PoseStamped.h>
