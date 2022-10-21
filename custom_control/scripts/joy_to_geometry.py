@@ -26,7 +26,6 @@ def main():
     target.pose.position.y = 0.518
     target.pose.position.z = 0.4
     
-
     pitch_angle = 0
     roll_angle = 0
     yaw_angle = 0

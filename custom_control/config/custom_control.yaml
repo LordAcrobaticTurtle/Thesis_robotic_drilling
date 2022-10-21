@@ -1,9 +1,18 @@
+ur_hardware_interface:
+   joints: &robot_joints
+     - shoulder_pan_joint
+     - shoulder_lift_joint
+     - elbow_joint
+     - wrist_1_joint
+     - wrist_2_joint
+     - wrist_3_joint
+     
 my_cartesian_compliance_controller:
     type: "position_controllers/CartesianComplianceController"
-    end_effector_link: "tool0"
+    end_effector_link: "grasping_center"
     robot_base_link: "base_link"
-    ft_sensor_ref_link: "tool0"
-    compliance_ref_link: "tool0"
+    ft_sensor_ref_link: "grasping_center"
+    compliance_ref_link: "grasping_center"
     target_frame_topic: "target_frame"
     joints:
      - shoulder_pan_joint
@@ -22,7 +31,7 @@ my_cartesian_compliance_controller:
         rot_z: 200
 
     solver:
-        error_scale: 0.035
+        error_scale: 0.03
 
     pd_gains:
         trans_x: {p: 0.05}

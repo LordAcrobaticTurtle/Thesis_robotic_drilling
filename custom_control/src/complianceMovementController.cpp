@@ -96,7 +96,7 @@ namespace thesis {
         m_targetFrame.pose.position.z = target;
         
         // If force exceeds 50N exit the loop
-        if (abs(m_currWrench.wrench.force.y) >= 50.0) {
+        if (abs(m_currWrench.wrench.force.z) >= 50.0) {
             isAppRunning = false;
             return;
         }
@@ -116,7 +116,7 @@ namespace thesis {
         // if abs(deviation.position.z) - target) < TOLERANCE) 
         //     isAppRunning = false;
         
-        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.y, 0.0);
+        ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, 0.0);
         // Can estimate currPose based on targetFrame and force + stiffness values
         
         m_pubTargetWrench.publish(m_targetWrench);
@@ -149,11 +149,12 @@ namespace thesis {
 
             ROS_INFO("m_targetFrame z: %f", m_targetFrame.pose.position.z);
             
-            if (abs(m_currWrench.wrench.force.y) >= 10.0) {
+            if (abs(m_currWrench.wrench.force.z) >= 10.0) {
                 // Take measurements of each force + torque axis
                 spikeMeasurements = m_currWrench;
                 break;
             }
+
             // Publish pos target
             // m_pubTargetWrench.publish(m_targetWrench);
             m_pubTargetFrame.publish(m_targetFrame);
@@ -167,7 +168,7 @@ namespace thesis {
         // deviation.position.x = m_currWrench.wrench.force.x/m_stiffnessX; 
         // deviation.position.y = m_currWrench.wrench.force.y/m_stiffnessY; 
         // deviation.position.z = m_currWrench.wrench.force.z/m_stiffnessZ; 
-        deviation.position.z = m_currWrench.wrench.force.y/m_stiffnessZ;
+        deviation.position.z = m_currWrench.wrench.force.z/m_stiffnessZ;
         std::cout << deviation << std::endl;
         // 
         // Convert TCP frame to base frame
