@@ -20,7 +20,7 @@ namespace thesis {
         
         // ADJUST HOME POSITION
         m_home.pose.position.x = 0.534;
-        m_home.pose.position.y = 0.128;
+        m_home.pose.position.y = 0.301;
         m_home.pose.position.z = 0.130;
         m_home.pose.orientation.w = 0.0;
         m_home.pose.orientation.x = -0.3828;
