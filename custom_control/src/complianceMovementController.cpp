@@ -19,9 +19,9 @@ namespace thesis {
     
         
         // ADJUST HOME POSITION
-        m_home.pose.position.x = 0.534;
-        m_home.pose.position.y = 0.301;
-        m_home.pose.position.z = 0.130;
+        m_home.pose.position.x = 0.544;
+        m_home.pose.position.y = 0.391;
+        m_home.pose.position.z = 0.080;
         m_home.pose.orientation.w = 0.0;
         m_home.pose.orientation.x = -0.3828;
         m_home.pose.orientation.y = 0.9238;
@@ -96,7 +96,7 @@ namespace thesis {
         m_targetFrame.pose.position.z = target;
         
         // If force exceeds 50N exit the loop
-        if (abs(m_currWrench.wrench.force.z) >= 50.0) {
+        if (abs(m_currWrench.wrench.force.z) >= 100.0) {
             isAppRunning = false;
             return;
         }
