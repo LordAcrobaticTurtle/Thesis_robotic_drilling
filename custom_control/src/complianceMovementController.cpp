@@ -19,13 +19,13 @@ namespace thesis {
     
         
         // ADJUST HOME POSITION
-        m_home.pose.position.x = 0.452;
-        m_home.pose.position.y = 0.275;
-        m_home.pose.position.z = 0.400;
-        m_home.pose.orientation.w = 0.7058;
-        m_home.pose.orientation.x = -0.707;
-        m_home.pose.orientation.y = 0.01645;
-        m_home.pose.orientation.z = -0.0248;
+        m_home.pose.position.x = 0.534;
+        m_home.pose.position.y = 0.128;
+        m_home.pose.position.z = 0.130;
+        m_home.pose.orientation.w = 0.0;
+        m_home.pose.orientation.x = -0.3828;
+        m_home.pose.orientation.y = 0.9238;
+        m_home.pose.orientation.z = 0.0;
 
         // Calculate initial quaternion
         // std::cout << m_home.pose.orientation << std::endl;
@@ -168,14 +168,14 @@ namespace thesis {
         // deviation.position.x = m_currWrench.wrench.force.x/m_stiffnessX; 
         // deviation.position.y = m_currWrench.wrench.force.y/m_stiffnessY; 
         // deviation.position.z = m_currWrench.wrench.force.z/m_stiffnessZ; 
-        deviation.position.z = m_currWrench.wrench.force.z/m_stiffnessZ;
+        deviation.position.z = spikeMeasurements.wrench.force.z/m_stiffnessZ;
         std::cout << deviation << std::endl;
         // 
         // Convert TCP frame to base frame
         
         // m_targetFrame.pose.position.x -= deviation.position.y;
         // m_targetFrame.pose.position.y -= deviation.position.x;
-        m_targetFrame.pose.position.z -= deviation.position.z;
+        // m_targetFrame.pose.position.z -= deviation.position.z;
         m_pubTargetFrame.publish(m_targetFrame);
         m_currPose = m_targetFrame;
         std::cout << m_targetFrame << std::endl;
