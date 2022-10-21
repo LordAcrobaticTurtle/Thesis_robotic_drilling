@@ -21,7 +21,7 @@ def main():
     rospy.init_node('IMU_logger',anonymous=True)
     now = datetime.datetime.now()
     dateAndTime = now.strftime('%d-%m-%y-%H-%M-%S')
-    filecsv = open('/home/mtrn4230/catkin_ws/src/Thesis_robotic_drilling/log_data'+dateAndTime+'.csv', 'w')
+    filecsv = open('/home/mtrn4230/catkin_ws/src/Thesis_robotic_drilling/log_data/'+dateAndTime+'.csv', 'w')
     writer = csv.writer(filecsv)    
     port = serial.Serial("/dev/ttyUSB0", 115200,timeout=1)
     
