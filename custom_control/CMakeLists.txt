@@ -69,7 +69,7 @@ add_executable(cmc src/main.cpp src/complianceMovementController.cpp src/joystic
 target_link_libraries(cmc ${catkin_LIBRARIES})
 
 
-add_executable(jtc  src/mainJQT.cpp src/jointTrajectoryController.cpp)
-target_link_libraries(jtc ${catkin_LIBRARIES})
+# add_executable(jtc  src/mainJQT.cpp src/jointTrajectoryController.cpp)
+# target_link_libraries(jtc ${catkin_LIBRARIES})
 
 # add_dependencies(cmc geometry_msgs)
