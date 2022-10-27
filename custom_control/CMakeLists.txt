@@ -7,6 +7,7 @@ project(custom_control)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(catkin REQUIRED COMPONENTS
   controller_manager
@@ -17,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   tf 
   tf2
 )
+
+find_package(yaml-cpp REQUIRED)
+
 
 
 ###################################
@@ -43,6 +47,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 catkin_install_python(PROGRAMS scripts/joy_to_geometry.py
@@ -66,7 +71,7 @@ target_link_libraries(remap ${catkin_LIBRARIES})
 
 
 add_executable(cmc src/main.cpp src/complianceMovementController.cpp src/joystick.cpp src/jointTrajectoryController)
-target_link_libraries(cmc ${catkin_LIBRARIES})
+target_link_libraries(cmc ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
 
 
 # add_executable(jtc  src/mainJQT.cpp src/jointTrajectoryController.cpp)
