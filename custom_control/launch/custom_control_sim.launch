@@ -1,0 +1,8 @@
+
+<!-- Launches cmc + joystick nodes + remaps topics -->
+<launch>
+    <node name="joystick_listener" pkg="joy" type="joy_node" output="screen"/>
+    <remap from="my_cartesian_force_controller/ft_sensor_wrench" to="wrench" />
+    <remap from="my_cartesian_compliance_controller/ft_sensor_wrench" to="wrench" />
+    <node name="custom_control_sim" pkg="custom_control" type="cmc" output="screen"/>
+</launch>
