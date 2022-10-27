@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from asyncio.proactor_events import _ProactorSocketTransport
 import rospy
 from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import PoseStamped
