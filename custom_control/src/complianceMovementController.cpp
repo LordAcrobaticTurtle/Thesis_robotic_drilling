@@ -2,10 +2,10 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <custom_control/complianceMovementController.h>
-
+#include <yaml-cpp/yaml.h>
 
 namespace thesis {
-    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) : m_joyHandle(p_nh), m_listener(m_tfBuffer) {
+    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) : m_joyHandle(p_nh) {
         ROS_INFO("CMC constructed");
         m_nh = p_nh;
         std::string controllerName = "/my_cartesian_compliance_controller/";
@@ -16,36 +16,62 @@ namespace thesis {
 
         m_targetFrame.header.frame_id = "base_link";
         m_targetWrench.header.frame_id = "base_link";
-    
+
+
+        // Fill parameters using config file
+        YAML::Node config = YAML::LoadFile("/home/sam/repos/Thesis_robotic_drilling/custom_control/config/config.yaml");
+    // They should be on parameter server
+
+        m_targetDepth = config["targetDepth"].as<double>();
+        m_usePeaking = config["usePeaking"].as<bool>();
+        m_stiffnessX = config["stiffnessX"].as<int>();
+        m_stiffnessY = config["stiffnessY"].as<int>();
+        m_stiffnessZ = config["stiffnessZ"].as<int>();
+        m_endEffectorLinkName = config["endEffectorLinkName"].as<std::string>();
+        m_baseLinkName = config["baseLinkName"].as<std::string>();
+        m_feedRate = config["feedRate"].as<float>();
+        bool useProgrammedHome = config["useProgrammedHome"].as<bool>();
         
+
+        tf::StampedTransform transform;
+
+        // Grab position from tf tree
+        for (int i = 0; i < 1000; i++) {
+            try {
+                m_listener.lookupTransform(m_endEffectorLinkName.c_str(), "tool0", ros::Time(0), transform);
+                m_home.pose.position.x = transform.getOrigin().x();
+                m_home.pose.position.y = transform.getOrigin().y();
+                m_home.pose.position.z = transform.getOrigin().z();
+                m_home.pose.orientation.w = transform.getRotation().w();
+                m_home.pose.orientation.x = transform.getRotation().x();
+                m_home.pose.orientation.y = transform.getRotation().y();
+                m_home.pose.orientation.z = transform.getRotation().z();
+                ROS_INFO("Successful set");
+                break;
+            } catch (tf::TransformException &ex) {
+                ROS_ERROR("%s", ex.what());
+                programmedHome();
+            }
+            
+        }
+        // If boolean is set to true in config file, overwrite m_home position
+        if (useProgrammedHome) {
+            programmedHome();
+        }        
         // ADJUST HOME POSITION
-        m_home.pose.position.x = 0.544;
-        m_home.pose.position.y = 0.391;
-        m_home.pose.position.z = 0.080;
-        m_home.pose.orientation.w = 0.0;
-        m_home.pose.orientation.x = -0.3828;
-        m_home.pose.orientation.y = 0.9238;
-        m_home.pose.orientation.z = 0.0;
-
-        // Calculate initial quaternion
-        // std::cout << m_home.pose.orientation << std::endl;
-        // tf2::Quaternion quat;
-        // quat.setRPY(0.012,-2.189,2.264);
-        // // quat.setRPY(180,0,2.36);
-        // quat.normalize();
-        // tf2::convert(quat, m_home.pose.orientation);
-        // std::cout << m_home.pose.orientation << std::endl;
-
+        // Grab home position from end effector current pose in the TF tree.
+        
         m_currPose = m_home;
-        m_home.header.frame_id = "base_link";
-        m_currPose.header.frame_id = "base_link";
-        m_currWrench.header.frame_id = "base_link";
+        m_home.header.frame_id = m_baseLinkName;
+        m_currPose.header.frame_id = m_baseLinkName;
+        m_currWrench.header.frame_id = m_baseLinkName;
         m_currWrench.wrench.force.x = 0;
         m_currWrench.wrench.force.y = 0;
         m_currWrench.wrench.force.z = 0;
         m_currWrench.wrench.torque.x = 0;
         m_currWrench.wrench.torque.y = 0;
         m_currWrench.wrench.torque.z = 0;
+
 
         // Conduct homing sequence
         homing();
@@ -89,7 +115,6 @@ namespace thesis {
             return;
         }
 
-        m_targetFrame = m_currPose;
         m_targetWrench.header.stamp = ros::Time::now();
         m_targetWrench.header.frame_id = "base_link";
         
@@ -100,21 +125,6 @@ namespace thesis {
             isAppRunning = false;
             return;
         }
-        // geometry_msgs::Pose deviation;
-        // deviation.position.z = m_currWrench.wrench.force.y/m_stiffnessZ;
-        // geometry_msgs::TransformStamped transformStamped;
-        
-        // TF listener
-        // TCP positoin
-        // try{
-        //     transformStamped = m_tfBuffer.lookupTransform("base_link", "tool0", ros::Time(0));
-        // } catch (tf2::TransformException &ex) {
-        //     ROS_WARN("%s",ex.what());
-        // }
-        // std::cout << transformStamped << std::endl;
-
-        // if abs(deviation.position.z) - target) < TOLERANCE) 
-        //     isAppRunning = false;
         
         ROS_INFO("CurrWrench Z: %f, PID response: %f", m_currWrench.wrench.force.z, 0.0);
         // Can estimate currPose based on targetFrame and force + stiffness values
@@ -225,6 +235,14 @@ namespace thesis {
         return result;
     }
 
-
+    void cmc::programmedHome() {
+        m_home.pose.position.x = 0.544;
+        m_home.pose.position.y = 0.391;
+        m_home.pose.position.z = 0.080;
+        m_home.pose.orientation.w = 0.0;
+        m_home.pose.orientation.x = -0.3828;
+        m_home.pose.orientation.y = 0.9238;
+        m_home.pose.orientation.z = 0.0;
+    }
     
 }

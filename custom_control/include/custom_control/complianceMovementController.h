@@ -8,6 +8,7 @@
 #include <dynamic_reconfigure/client.h>
 #include <tf/transform_listener.h>
 #include <tf2/convert.h>
+
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
 #define TOLERANCE 0.01
@@ -46,8 +47,7 @@ namespace thesis {
             geometry_msgs::PoseStamped m_home;
             geometry_msgs::PoseStamped m_currPose;
             geometry_msgs::WrenchStamped m_currWrench;
-            tf2_ros::Buffer m_tfBuffer;
-            tf2_ros::TransformListener m_listener;
+            tf::TransformListener  m_listener;
 
             // Wrench callback + data
             ros::Subscriber m_subWrench;
@@ -60,14 +60,22 @@ namespace thesis {
             double m_ki = 0.1;
             ros::Timer m_timer;
             
-            const float m_stiffnessX = 500.0;
-            const float m_stiffnessY = 500.0;
-            const float m_stiffnessZ = 500.0;
+            // YAML config files that can be changed at runtime
+            bool m_usePeaking;
+            int m_stiffnessX;
+            int m_stiffnessY;
+            int m_stiffnessZ;
+            // Feedrate currently not implemented
+            float m_feedRate;
+            std::string m_endEffectorLinkName;
+            std::string m_baseLinkName;
             
+
             // FIX FOR FRIDAY
             float m_rateHz = 50 ;
             
             void homing();
+            void programmedHome();
             
             
     };
