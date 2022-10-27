@@ -4,10 +4,10 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/JointState.h>
 #include <ros/timer.h>
-#include "custom_control/joystick.h"
 #include <dynamic_reconfigure/client.h>
 #include <tf/transform_listener.h>
 #include <tf2/convert.h>
+#include "custom_control/joystick.h"
 
 // Find a way to set dynamic reconfigure up inside this program. Or inside the launch file would be even better
 
@@ -36,6 +36,7 @@ namespace thesis {
             // ros::Rate m_rate;
             state m_state;
             float m_targetDepth;
+            bool m_isAppRunning;
             // Publisher to target frame
             ros::Publisher m_pubTargetFrame;
             geometry_msgs::PoseStamped m_targetFrame;
@@ -45,6 +46,7 @@ namespace thesis {
             geometry_msgs::WrenchStamped m_targetWrench;
 
             geometry_msgs::PoseStamped m_home;
+            geometry_msgs::PoseStamped m_posAfterHoming;
             geometry_msgs::PoseStamped m_currPose;
             geometry_msgs::WrenchStamped m_currWrench;
             tf::TransformListener  m_listener;
@@ -67,15 +69,24 @@ namespace thesis {
             int m_stiffnessZ;
             // Feedrate currently not implemented
             float m_feedRate;
+            float m_maxDrillForce;
+            float m_maxHomeForce;
             std::string m_endEffectorLinkName;
             std::string m_baseLinkName;
-            
+            float m_drillBitWidth; 
+            float m_tolerance;
+            // Map to store 
+            std::vector<std::tuple<float, float>> m_waypoints;
 
             // FIX FOR FRIDAY
-            float m_rateHz = 50 ;
+            float m_rateHz = 50;
             
             void homing();
             void programmedHome();
+            void computePecking(float targetDepth, float drillBitWidth );
+            void updateWaypoints();
+            void tfposCallback(const ros::TimerEvent &t);
+            ros::Timer m_poseTimer;
             
             
     };
