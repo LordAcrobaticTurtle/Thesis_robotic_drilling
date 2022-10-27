@@ -10,7 +10,8 @@ namespace thesis {
         ROS_INFO("JOYSTICK CONSTRUCTED");
         m_nh = p_nh;
         m_subJoy = m_nh.subscribe<sensor_msgs::Joy>("/joy", 1000, &joystick::joyCallback,this);
-        m_pubWrench = m_nh.advertise<geometry_msgs::WrenchStamped>("/my_cartesian_compliance_controller/ft_sensor_wrench", 1000);
+        m_pubWrench = m_nh.advertise<geometry_msgs::WrenchStamped>("/wrench", 1000);
+        cbTime = m_nh.createTimer(ros::Duration(1/50), &joystick::cbTimer, this);
     }
     
     joystick::~joystick() {
@@ -24,27 +25,26 @@ namespace thesis {
     }
 
     void joystick::publish() {
-        joyToSensorWrench();
+        // joyToSensorWrench();
     }
-
-    
 
     void joystick::joyToSensorWrench() {
         // ROS_INFO("Converting joy state to a wrench msg");
         geometry_msgs::WrenchStamped topic;
         
         if (m_joyState.axes.size() <= 0) {
-            ROS_WARN("joyToSensorWrench: Empty joy msg");
+            // ROS_DEBUG("joyToSensorWrench: Empty joy msg");
             return;
         }
         // ROS_INFO("Publishing sensor message");
-        topic.header.frame_id = "tool0_controller";
+        topic.header.frame_id = "base_link";
         topic.header.stamp = ros::Time::now();
         topic.wrench.force.z = 20*(m_joyState.axes[4]);
-        m_pubWrench.publish(topic);
-        
-        
+        m_pubWrench.publish(topic);        
     }
 
+    void joystick::cbTimer(const ros::TimerEvent &t) {
+        joyToSensorWrench();
+    }
 
 }

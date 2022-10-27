@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <ros/timer.h>
 
 namespace thesis {
 
@@ -24,6 +25,9 @@ namespace thesis {
             // Class functionality
             ros::Publisher m_pubWrench;
             void joyToSensorWrench();
+
+            ros::Timer cbTime;
+            void cbTimer(const ros::TimerEvent &t);
 
     };
 
