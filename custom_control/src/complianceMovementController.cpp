@@ -153,12 +153,16 @@ namespace thesis {
             ROS_INFO("depth target: %f", std::get<0>(m_waypoints[i]));
             m_targetFrame.pose.position.z = std::get<0>(m_waypoints[i]);
             float time = std::get<1>(m_waypoints[i]);
+
             if (time != -1) {
+                m_timer.stop();
                 ros::Rate sleep(time);
                 sleep.sleep();
+                m_timer.start();
             }
             i++;
         }
+        
     }
 
     void cmc::homing() {
