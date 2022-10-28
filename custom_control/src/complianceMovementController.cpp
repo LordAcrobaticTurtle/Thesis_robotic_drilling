@@ -330,7 +330,7 @@ namespace thesis {
         int pecksInCalc = numOfPecks+1;
         // How big are the increments?
         float targetIncrements =  (float) m_targetDepth/pecksInCalc;     
-        ROS_INFO("Target Incs: %f, #pecks: %d", targetIncrements, pecksInCalc);
+        ROS_INFO("Target Incs: %f, #pecks: %d", targetIncrements, pecksInCalc);        
         
         // Need to alternate between drill and pecking
         // The last item in the last must be the target depth

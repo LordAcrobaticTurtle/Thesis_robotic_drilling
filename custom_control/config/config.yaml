@@ -1,6 +1,6 @@
-stiffnessX: 500
-stiffnessY: 500
-stiffnessZ: 500
+stiffnessX: 4000
+stiffnessY: 4000
+stiffnessZ: 2500
 useProgrammedHome: true
 endEffectorLinkName: grasping_center
 baseLinkName: base_link
@@ -13,7 +13,7 @@ usePeaking: false
 tolerance: 1.0 # mm
 m_homeX: 0.5 # m
 m_homeY: 0.150 # m
-m_homeZ: 0.20  # m
+m_homeZ: 0.150  # m
 m_homeqX: -0.0273594
 m_homeqY: 0.999623
 m_homeqZ: -0.000577826
@@ -23,3 +23,5 @@ m_kd: 0
 m_ki: 2000 
 m_iMax: 30
 m_PIDmax: 50
+error_scale: 0.04
+iterations: 10
