@@ -23,9 +23,9 @@ my_cartesian_compliance_controller:
      - wrist_3_joint
 
     stiffness:
-        trans_x: 500
-        trans_y: 500
-        trans_z: 500
+        trans_x: 2500
+        trans_y: 2500
+        trans_z: 2500
         rot_x: 200
         rot_y: 200
         rot_z: 200

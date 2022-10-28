@@ -57,9 +57,6 @@ namespace thesis {
             geometry_msgs::WrenchStamped::ConstPtr m_currWrenchMsg;
 
             double PID(double setpoint, double currentValue);
-            double m_kp = 10;
-            double m_kd = 1;
-            double m_ki = 0.1;
             ros::Timer m_timer;
             
             // YAML config files that can be changed at runtime
@@ -82,6 +79,13 @@ namespace thesis {
             float m_homeqX;
             float m_homeqY;
             float m_homeqZ;
+            double m_kp;
+            double m_kd;
+            double m_ki;
+            double m_PIDmax;
+            double m_PIDmin;
+            double m_iMax;
+            double m_iMin;
             // Map to store 
             std::vector<std::tuple<float, float>> m_waypoints;
 
