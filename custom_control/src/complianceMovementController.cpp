@@ -22,7 +22,7 @@ namespace thesis {
 
 
         // Fill parameters using config file
-        YAML::Node config = YAML::LoadFile("/home/sam/repos/Thesis_robotic_drilling/custom_control/config/config.yaml");
+        YAML::Node config = YAML::LoadFile("/home/mtrn4230/catkin_ws/src/Thesis_robotic_drilling/custom_control/config/config.yaml");
     // They should be on parameter server
 
         m_targetDepth = config["targetDepth"].as<double>()/1000;
@@ -37,10 +37,18 @@ namespace thesis {
         m_maxHomeForce = config["maxHomeForce"].as<float>();
         m_drillBitWidth = config["drillBitWidth"].as<float>()/1000;
         m_tolerance = config["tolerance"].as<float>() / 1000;
+        m_homeX = config["m_homeX"].as<float>();
+        m_homeY = config["m_homeY"].as<float>();
+        m_homeZ = config["m_homeZ"].as<float>();
+        m_homeqW = config["m_homeqW"].as<float>();
+        m_homeqX = config["m_homeqX"].as<float>();
+        m_homeqY = config["m_homeqY"].as<float>();
+        m_homeqZ = config["m_homeqZ"].as<float>();
+        
         bool useProgrammedHome = config["useProgrammedHome"].as<bool>();
         
         // Delay for a second so the tf tree can update.
-        ros::Rate delay(1);
+        ros::Rate delay(0.5);
         // Setup m_currPose to listen to tf 
         m_poseTimer = m_nh.createTimer(ros::Duration(1/m_rateHz), &cmc::tfposCallback,this);
         delay.sleep();
@@ -54,7 +62,7 @@ namespace thesis {
                 m_home.pose.orientation.x = transform.getRotation().x();
                 m_home.pose.orientation.y = transform.getRotation().y();
                 m_home.pose.orientation.z = transform.getRotation().z();
-                ROS_INFO("Successful set");
+                ROS_INFO("Successful set from TF tree");
                 break;
             } catch (tf::TransformException &ex) {
                 ROS_ERROR("%s", ex.what());
@@ -123,11 +131,11 @@ namespace thesis {
             m_pubTargetFrame.publish(m_home);
             return;
         }
-
+    
         updateWaypoints();
         m_targetWrench.header.stamp = ros::Time::now();
         m_targetWrench.header.frame_id = "base_link";
-    
+
         if (abs(m_currWrench.wrench.force.z) >= m_maxDrillForce) {
             m_isAppRunning = false;
             return;
@@ -143,26 +151,40 @@ namespace thesis {
     }
 
     void cmc::updateWaypoints() {
-        static int i = 0;
-        if (i == m_waypoints.size()) {
+        static int waypoint_index = 0;
+        static int timerCounter = 0;
+        static float time = -1;
+        static bool hasTimerReset = false;
+
+        // Start timer when within tolerance of target position.
+        // When updating waypoint, set m_targetFrame + increment i. 
+        if (waypoint_index == m_waypoints.size()) {
             ROS_WARN("WAYPOINTS COMPLETE");
             return;
         }
+        ROS_INFO("Current position: %f", m_currPose.pose.position.z);
+        ROS_INFO("Current target: %f", m_targetFrame.pose.position.z);
         // Check if we have reached the current waypoint within tolerance
-        if (m_targetFrame.pose.position.z - m_tolerance <= m_currPose.pose.position.z && m_currPose.pose.position.z <= m_targetFrame.pose.position.z + m_tolerance) {
-            ROS_INFO("depth target: %f", std::get<0>(m_waypoints[i]));
-            m_targetFrame.pose.position.z = std::get<0>(m_waypoints[i]);
-            float time = std::get<1>(m_waypoints[i]);
-
-            if (time != -1) {
-                m_timer.stop();
-                ros::Rate sleep(time);
-                sleep.sleep();
-                m_timer.start();
-            }
-            i++;
-        }
         
+        // Check if timer is finished. If true update waypoint
+        if (timerCounter == (int) time) {
+            ROS_WARN("depth target update: %f", std::get<0>(m_waypoints[waypoint_index]));
+            m_targetFrame.pose.position.z = std::get<0>(m_waypoints[waypoint_index]);
+            waypoint_index++;
+            hasTimerReset = false;
+        // Else Check if we are in position
+        }
+        // Need to do this once per waypoint.
+        if ((m_targetFrame.pose.position.z - m_tolerance <= m_currPose.pose.position.z) && (m_currPose.pose.position.z <= m_targetFrame.pose.position.z + m_tolerance) && !hasTimerReset) {
+            ROS_WARN("Timer restart");
+            time = std::get<1>(m_waypoints[waypoint_index]);
+            // If true start timer/counter up to the number supplied array
+            timerCounter = 0;
+            
+            hasTimerReset = true;
+        }
+        // If false wait for system to move into position.
+        timerCounter++;
     }
 
     void cmc::homing() {
@@ -267,8 +289,14 @@ namespace thesis {
 
     // Written with parameters so that I could in a years time lol, actually do some unit testing
     void cmc::computePecking(float p_targetDepth, float p_drillBitWidth) {
-        // 
+        // If the config file says to ignore pecking and just drive into material.
+        // Set a single waypoint as the target depth
         ROS_INFO("Target depth: %f, drillBitWidth: %f", p_targetDepth, p_drillBitWidth);
+        if (!m_usePeaking) {
+            m_waypoints.push_back(std::tuple<float, float>(p_targetDepth, -1));
+            return;
+        }
+        
         int numOfPecks = -1;
         if (p_targetDepth < 3*p_drillBitWidth) {
             numOfPecks = 0;
@@ -289,8 +317,6 @@ namespace thesis {
             // m_waypoints.insert(std::pair<float, float>(p_targetDepth, 2.0));
             m_waypoints.push_back(std::tuple<float,float>(p_targetDepth, 2.0));   
             return;
-        } else if (numOfPecks == 1) {
-            // Pick a point halfway between current pose and 
         }
 
         // Calculate placement of waypoints.
@@ -303,10 +329,11 @@ namespace thesis {
         // The last item in the last must be the target depth
         ROS_INFO("HOMING POSE");
         std::cout << m_posAfterHoming << std::endl;
+        m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z, 2.0*m_rateHz));
         for (int i = 1; i <= pecksInCalc; i++) {
             float depth = m_posAfterHoming.pose.position.z - i*targetIncrements;
-            float time = 2.0;
-            m_waypoints.push_back(std::tuple<float, float>(depth, -1));
+            float time = 2.0*m_rateHz;
+            m_waypoints.push_back(std::tuple<float, float>(depth, time));
             m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z, time));
             std::cout << "Target depth for peck: " << depth << std::endl;
         }
@@ -316,13 +343,13 @@ namespace thesis {
     }
 
     void cmc::programmedHome() {
-        m_home.pose.position.x = 0.444;
-        m_home.pose.position.y = 0.391;
-        m_home.pose.position.z = 0.30;
-        m_home.pose.orientation.w = 0.0;
-        m_home.pose.orientation.x = -0.3828;
-        m_home.pose.orientation.y = 0.9238;
-        m_home.pose.orientation.z = 0.0;
+        m_home.pose.position.x = m_homeX;
+        m_home.pose.position.y = m_homeY;
+        m_home.pose.position.z = m_homeZ;
+        m_home.pose.orientation.x = m_homeqX;
+        m_home.pose.orientation.y = m_homeqY;
+        m_home.pose.orientation.z = m_homeqZ;
+        m_home.pose.orientation.w = m_homeqW;
     }
 
     void cmc::tfposCallback(const ros::TimerEvent &t) {

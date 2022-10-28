@@ -2,13 +2,19 @@ stiffnessX: 500
 stiffnessY: 500
 stiffnessZ: 500
 useProgrammedHome: true
-endEffectorLinkName: tool0
+endEffectorLinkName: grasping_center
 baseLinkName: base_link
 feedRate: 10       # mm/s
 maxDrillForce: 100 # N
 maxHomeForce: 10   # N
 drillBitWidth: 5   # mm
-targetDepth: 26     # mm
+targetDepth: 15     # mm
 usePeaking: true 
-tolerance: 0.01 # mm
-
+tolerance: 1.5 # mm
+m_homeX: 0.7 # m
+m_homeY: 0.150 # m
+m_homeZ: 0.20  # m
+m_homeqX: -0.0273594
+m_homeqY: 0.999623
+m_homeqZ: -0.000577826
+m_homeqW: 0.0024396 

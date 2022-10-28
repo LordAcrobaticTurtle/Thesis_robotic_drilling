@@ -75,6 +75,13 @@ namespace thesis {
             std::string m_baseLinkName;
             float m_drillBitWidth; 
             float m_tolerance;
+            float m_homeX;
+            float m_homeY;
+            float m_homeZ;
+            float m_homeqW;
+            float m_homeqX;
+            float m_homeqY;
+            float m_homeqZ;
             // Map to store 
             std::vector<std::tuple<float, float>> m_waypoints;
 
