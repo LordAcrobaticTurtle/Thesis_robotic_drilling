@@ -2,6 +2,6 @@
         <node name="vibrationSensorLogging" pkg="custom_control" type="readVinrationSensor.py" output="screen"/>
         <node pkg="rosbag" type="record" name="rosbag_record_state"
        args="record -o /home/mtrn4230/catkin_ws/src/Thesis_robotic_drilling/bag/ /joint_states /my_cartesian_compliance_controller/target_frame /my_cartesian_compliance_controller/target_wrench /wrench"/>
-       <node name="custom movement controller" pkg="custom_control" type="cmc" output="screen"/>
+       <node name="custom_movement_controller" pkg="custom_control" type="cmc" output="screen"/>
 </launch>
 
