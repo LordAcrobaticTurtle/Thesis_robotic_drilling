@@ -328,64 +328,28 @@ namespace thesis {
             std::cout << std::get<0>(m_waypoints[i]) << std::endl; 
 
     }
+
     // Written with parameters so that I could, in a years time lol, actually do some unit testing
     void cmc::computePeckWaypoints(float p_targetDepth, float p_drillBitWidth) {
-        // If the config file says to ignore pecking and just drive into material.
-        // Set a single waypoint as the target depth
-        ROS_INFO("Target depth: %f, drillBitWidth: %f", p_targetDepth, p_drillBitWidth);
-        if (!m_usePeaking) {
-            // Perform drilling
-            m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z - p_targetDepth, m_rateHz));
-            // Return to home position
-            m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z + 0.01, m_rateHz));
-            return;
+        // Define a "feedrate" mm/s
+        // constraints, no guarantee that thearm will reach the setpoint. 
+        // Hopefully, the "updateWaypoints" function will handle.
+
+        // Calculate depth of step as user supplied
+        // How many steps can be completed in using depthStep?
+        float numSteps = p_targetDepth/m_depthStep; 
+        float positionAfterDrilling = m_posAfterHoming.pose.position.z - p_targetDepth;
+        numSteps = floor(numSteps);
+        // Add waypoints of numsteps
+        for (int i = 1; i <= numSteps ; i++) {
+            m_waypoints.push_back(std::tuple<float ,float>(m_posAfterHoming.pose.position.z - i*m_depthStep, 1.0));
+            m_waypoints.push_back(std::tuple<float ,float>(m_posAfterHoming.pose.position.z +0.005, 1.0));
         }
         
-        int numOfPecks = -1;
-        if (p_targetDepth < 3*p_drillBitWidth) {
-            numOfPecks = 0;
-        } else if (3*p_drillBitWidth <= p_targetDepth && p_targetDepth <= 5*p_drillBitWidth) {
-            numOfPecks = 1;
-        } else if (p_targetDepth > 5*p_drillBitWidth) {
-            numOfPecks = 2;
-        }
-        
-        if (numOfPecks == -1) {
-            ROS_ERROR("ERROR CALCULATING PECKS");
-            return;
-        }
-
-        // Drill straight into material without popping back out
-        if (numOfPecks == 0) {
-            ROS_INFO("Single peck");
-            // m_waypoints.insert(std::pair<float, float>(p_targetDepth, 2.0));
-            m_waypoints.push_back(std::tuple<float,float>(m_posAfterHoming.pose.position.z - p_targetDepth, m_rateHz));   
-            m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z + 0.01, m_rateHz));
-            return;
-        }
-
-        // Calculate placement of waypoints.
-        int pecksInCalc = numOfPecks+1;
-        // How big are the increments?
-        float targetIncrements =  (float) m_targetDepth/pecksInCalc;     
-        ROS_INFO("Target Incs: %f, #pecks: %d", targetIncrements, pecksInCalc);        
-        
-        // Need to alternate between drill and pecking
-        // The last item in the last must be the target depth
-        ROS_INFO("HOMING POSE");
-        std::cout << m_posAfterHoming << std::endl;
-        m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z, 2.0*m_rateHz));
-        
-        // TODO - Make peck increments equal to a multiple of drill bit, in line with the literature. 
-
-        for (int i = 1; i <= pecksInCalc; i++) {
-            float depth = m_posAfterHoming.pose.position.z - i*targetIncrements;
-            float time = 1.0*m_rateHz;
-            m_waypoints.push_back(std::tuple<float, float>(depth, time));
-            m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z+0.01, 0.1*time));
-            std::cout << "Target depth for peck: " << depth << std::endl;
-        }
-
+        // Add the final point.
+        m_waypoints.push_back(std::tuple<float, float>(positionAfterDrilling, 1));
+        // Rise above material once complete.
+        m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z+0.02, 1));
         for (auto i = 0; i < m_waypoints.size(); i++) 
             std::cout << std::get<0>(m_waypoints[i]) << std::endl; 
     }

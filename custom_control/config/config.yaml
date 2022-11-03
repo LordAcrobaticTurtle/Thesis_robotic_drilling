@@ -1,26 +1,28 @@
-stiffnessX: 4000
-stiffnessY: 4000
+stiffnessX: 2500
+stiffnessY: 2500
 stiffnessZ: 2500
-useProgrammedHome: false
-endEffectorLinkName: grasping_center
-baseLinkName: base_link
-feedRate: 10       # mm/s
-maxDrillForce: 100 # N
-maxHomeForce: 10   # N
-drillBitWidth: 5   # mm
-targetDepth: 15     # mm
-usePeaking: true
-tolerance: 1.0 # mm
+useProgrammedHome: true
 m_homeX: 0.5 # m
-m_homeY: 0.150 # m
-m_homeZ: 0.150  # m
+m_homeY: 0.414 # m
+m_homeZ: 0.1  # m
 m_homeqX: -0.0273594
 m_homeqY: 0.999623
 m_homeqZ: -0.000577826
 m_homeqW: 0.0024396 
+endEffectorLinkName: grasping_center
+baseLinkName: base_link
+feedRate: 10       # mm/s
+maxDrillForce: 100 # N
+maxHomeForce: 15   # sN
+drillBitWidth: 5   # mm
+targetDepth: 10    # mm
+wpMethod: peck
+depthStep: 3
+usePeaking: true
+tolerance: 0.5 # mm
 m_kp: 5
 m_kd: 0
-m_ki: 2000 
+m_ki: 1000 
 m_iMax: 30
 m_PIDmax: 50
 error_scale: 0.04
