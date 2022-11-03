@@ -3,6 +3,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <custom_control/complianceMovementController.h>
 #include <yaml-cpp/yaml.h>
+#include <cmath>
 
 namespace thesis {
     complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh) : m_joyHandle(p_nh) {
@@ -26,6 +27,11 @@ namespace thesis {
     // They should be on parameter server
 
         m_targetDepth = config["targetDepth"].as<double>()/1000;
+        m_depthStep = config["depthStep"].as<float>()/1000;
+        if (m_depthStep > m_targetDepth) {
+            ROS_ERROR("Depth step must be smaller than target depth. Halting");
+            while (1);
+        }
         m_usePeaking = config["usePeaking"].as<bool>();
         m_stiffnessX = config["stiffnessX"].as<int>();
         m_stiffnessY = config["stiffnessY"].as<int>();
@@ -51,6 +57,7 @@ namespace thesis {
         m_PIDmin = -1*m_PIDmax;
         m_iMax = config["m_iMax"].as<double>();
         m_iMin = -m_iMax;
+        std::string wpMethod = config["wpMethod"].as<std::string>();
         bool useProgrammedHome = config["useProgrammedHome"].as<bool>();
         
         // Delay for a second so the tf tree can update.
@@ -100,14 +107,30 @@ namespace thesis {
 
         // Conduct homing sequence
         homing();
+        if (wpMethod.compare("step") == 0) {
+            ROS_WARN("STEP");
+            computeStepWaypoints(m_targetDepth, m_drillBitWidth);
+        } else if (wpMethod.compare("peck") == 0) {
+            ROS_WARN("PECK");
+            computePeckWaypoints(m_targetDepth, m_drillBitWidth);
+        } else {
+            ROS_ERROR("YOU MUST SPECIFY EITHER STEP OR PECK");
+            while(ros::ok());
+        }
+        ROS_INFO("Activate drill now");
+        sleep(5);
+        
         // After homing sequence returns, start the main loop
         m_timer = m_nh.createTimer(ros::Duration(1/m_rateHz), &cmc::main,this);
     };
 
-    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh, float p_depth) : 
+    complianceMovementController::complianceMovementController(ros::NodeHandle &p_nh, bool p_home) : 
     complianceMovementController(p_nh) 
     {
-        m_targetDepth = p_depth/1000.0;
+        if (p_home) {
+            m_pubTargetFrame.publish(m_home);
+            while(ros::ok());
+        }
     }
 
     complianceMovementController::~complianceMovementController() {
@@ -149,7 +172,7 @@ namespace thesis {
         // Change Force applied using PID. 
         double response = PID(m_targetFrame.pose.position.z, m_currPose.pose.position.z);
         m_targetWrench.wrench.force.z = -response;
-        ROS_INFO("CurrWrench Z: %f, PID response: %f, currpos: %f, targetpos: %f", m_currWrench.wrench.force.z, m_targetWrench.wrench.force.z, m_currPose.pose.position.z, m_targetFrame.pose.position.z);
+        // ROS_INFO("CurrWrench Z: %f, PID response: %f, currpos: %f, targetpos: %f", m_currWrench.wrench.force.z, m_targetWrench.wrench.force.z, m_currPose.pose.position.z, m_targetFrame.pose.position.z);
         // Can estimate currPose based on targetFrame and force + stiffness values
         
         m_pubTargetWrench.publish(m_targetWrench);
@@ -159,11 +182,12 @@ namespace thesis {
     }
 
     void cmc::updateWaypoints() {
+        // 
         static int waypoint_index = 0;
         static int timerCounter = 0;
         static float time = -1;
         static bool hasTimerReset = false;
-
+        
         // Start timer when within tolerance of target position.
         // When updating waypoint, set m_targetFrame + increment i. 
         if (waypoint_index == m_waypoints.size()) {
@@ -200,14 +224,20 @@ namespace thesis {
         // Measure force in each direction and change setpoint to be the difference using spring relationship
 
         // Hacking the mainframe. Read forces in Y, command positions in Z.
+
         static bool isHomeFound = false;
         ros::Rate rate(100);
         float j = 0;
         geometry_msgs::WrenchStamped spikeMeasurements;
         geometry_msgs::Pose deviation;
+        
+        // Move to the home position and wait for the arm to get there.
+        m_pubTargetFrame.publish(m_home);
+        for (int i = 0; i < 100; i++) 
+            rate.sleep();
+        
         while (ros::ok()) {
             // Assumption, starting at UR5e home position.
-
             // Slowly move EE down
             m_targetFrame = m_home;
             m_targetFrame.pose.position.z = -0.5*sin(j)+m_home.pose.position.z;
@@ -222,39 +252,26 @@ namespace thesis {
                 spikeMeasurements = m_currWrench;
                 break;
             }
-
-            // Publish pos target
-            // m_pubTargetWrench.publish(m_targetWrench);
-           
             m_pubTargetFrame.publish(m_targetFrame);
-            
-            // Sleep loop
             rate.sleep();
             j += 0.00025;
         }
         
-        // Calculate deviation
-        // deviation.position.x = m_currWrench.wrench.force.x/m_stiffnessX; 
-        // deviation.position.y = m_currWrench.wrench.force.y/m_stiffnessY; 
-        // deviation.position.z = m_currWrench.wrench.force.z/m_stiffnessZ; 
         deviation.position.z = spikeMeasurements.wrench.force.z/m_stiffnessZ;
+        // COMPARE currPose with deviation
+        ROS_INFO("DEVIATION");
         std::cout << deviation << std::endl;
+        ROS_INFO("currPose");
+        std::cout << m_currPose << std::endl;
+        ROS_INFO("TARGET_FRAME");
+        std::cout << m_targetFrame << std::endl;
         // Convert TCP frame to base frame
          // Retrieve current EE pose
-        m_posAfterHoming = m_currPose;//currPose
-        // m_targetFrame.pose.position.x -= deviation.position.y;
-        // m_targetFrame.pose.position.y -= deviation.position.x;
-        // m_targetFrame.pose.position.z -= deviation.position.z;
-        computePecking(m_targetDepth, m_drillBitWidth);
-        m_pubTargetFrame.publish(m_targetFrame);
-        m_currPose = m_targetFrame;
-        std::cout << m_targetFrame << std::endl;
-        ROS_INFO("Activate drill now");
-        sleep(5);
-        
-        // Homing works with drill on
+        m_posAfterHoming = m_currPose;
+        m_pubTargetFrame.publish(m_currPose);
     }
 
+// STATIC VALUES MEAN YOU CAN ONLY USE THIS ONE A SINGLE AXIS
     double cmc::PID(double setpoint, double currValue) {
         static double prevError = 0;
         static double iSum = 0;
@@ -289,9 +306,30 @@ namespace thesis {
 
         return result;
     }
+    void cmc::computeStepWaypoints(float p_targetDepth, float p_drillBitWidth) {
+        // Define a "feedrate" mm/s
+        // constraints, no guarantee that thearm will reach the setpoint. 
+        // Hopefully, the "updateWaypoints" function will handle.
 
-    // Written with parameters so that I could in a years time lol, actually do some unit testing
-    void cmc::computePecking(float p_targetDepth, float p_drillBitWidth) {
+        // Calculate depth of step as user supplied
+        // How many steps can be completed in using depthStep?
+        float numSteps = p_targetDepth/m_depthStep; 
+        float positionAfterDrilling = m_posAfterHoming.pose.position.z - p_targetDepth;
+        numSteps = floor(numSteps);
+        // Add waypoints of numsteps
+        for (int i = 1; i <= numSteps ; i++) 
+            m_waypoints.push_back(std::tuple<float ,float>(m_posAfterHoming.pose.position.z - i*m_depthStep, 1.0));
+        
+        // Add the final point.
+        m_waypoints.push_back(std::tuple<float, float>(positionAfterDrilling, 1));
+        // Rise above material once complete.
+        m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z+0.02, 1));
+        for (auto i = 0; i < m_waypoints.size(); i++) 
+            std::cout << std::get<0>(m_waypoints[i]) << std::endl; 
+
+    }
+    // Written with parameters so that I could, in a years time lol, actually do some unit testing
+    void cmc::computePeckWaypoints(float p_targetDepth, float p_drillBitWidth) {
         // If the config file says to ignore pecking and just drive into material.
         // Set a single waypoint as the target depth
         ROS_INFO("Target depth: %f, drillBitWidth: %f", p_targetDepth, p_drillBitWidth);
@@ -337,6 +375,9 @@ namespace thesis {
         ROS_INFO("HOMING POSE");
         std::cout << m_posAfterHoming << std::endl;
         m_waypoints.push_back(std::tuple<float, float>(m_posAfterHoming.pose.position.z, 2.0*m_rateHz));
+        
+        // TODO - Make peck increments equal to a multiple of drill bit, in line with the literature. 
+
         for (int i = 1; i <= pecksInCalc; i++) {
             float depth = m_posAfterHoming.pose.position.z - i*targetIncrements;
             float time = 1.0*m_rateHz;

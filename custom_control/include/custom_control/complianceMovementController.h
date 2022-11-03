@@ -21,7 +21,7 @@ namespace thesis {
                 GENERAL   
             };
             complianceMovementController(ros::NodeHandle &p_nh);
-            complianceMovementController(ros::NodeHandle &p_nh, float p_depth);
+            complianceMovementController(ros::NodeHandle &p_nh, bool home);
             ~complianceMovementController();
             void setMode(state p_state);
             void main(const ros::TimerEvent &t);
@@ -86,6 +86,7 @@ namespace thesis {
             double m_PIDmin;
             double m_iMax;
             double m_iMin;
+            float m_depthStep;
             // Map to store 
             std::vector<std::tuple<float, float>> m_waypoints;
 
@@ -94,8 +95,10 @@ namespace thesis {
             
             void homing();
             void programmedHome();
-            void computePecking(float targetDepth, float drillBitWidth );
+            void computePeckWaypoints(float targetDepth, float drillBitWidth );
+            void computeStepWaypoints(float targetDepth, float drillBitWidth);
             void updateWaypoints();
+            // Called in a ros timer event
             void tfposCallback(const ros::TimerEvent &t);
             ros::Timer m_poseTimer;
             
