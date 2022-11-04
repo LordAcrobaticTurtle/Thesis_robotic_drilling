@@ -6,6 +6,10 @@
 #include <tf/transform_listener.h>
 
 int main(int argc, char ** argv) {
+    bool home = false;
+    if (argc >= 2) 
+        home = true;
+    
     // init ros
     ros::init(argc,argv,"cmc_node");
     ros::NodeHandle nh;
@@ -13,7 +17,7 @@ int main(int argc, char ** argv) {
     ros::AsyncSpinner spin(4);
     spin.start();
     
-    thesis::cmc ctrl(nh);
+    thesis::cmc ctrl(nh,home);
     // thesis::jointTrajectoryController ctl(nh);
     
     ros::Rate rate(ctrl.get_mRateHz());
