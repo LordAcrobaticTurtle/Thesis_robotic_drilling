@@ -1,7 +1,7 @@
 <launch>
   
   <!-- Load joint controller configurations from YAML file to parameter server -->
-  <rosparam file="$(find custom_control)/config/custom_control.yaml" command="load"/>
+  <rosparam file="$(find custom_control)/config/custom_control_original.yaml" command="load"/>
  
   <!--  load the controllers -->
   <node name="controller_unspawner" pkg="controller_manager" type="controller_manager" respawn="false"
