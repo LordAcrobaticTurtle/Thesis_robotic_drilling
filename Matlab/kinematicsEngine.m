@@ -3,7 +3,7 @@
 % disp(d)
 
 %% Get files
-List = dir('B:\Uni\Thesis\Thesis_robotic_drilling\Matlab\Data\21-10-22\*joint_states.xlsx');
+List = dir('B:\Uni\Thesis\Thesis_robotic_drilling\Matlab\Data\3-11-22\*joint_states.xlsx');
 FileNames = fullfile({List.folder}, {List.name});
 
 %% Iterate over files generating cartesian position

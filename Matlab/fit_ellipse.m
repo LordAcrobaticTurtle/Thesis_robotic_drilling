@@ -1,4 +1,5 @@
-function ellipse_t = fit_ellipse( x,y,axis_handle, colour )
+function A = fit_ellipse( x,y,axis_handle, colour )
+A = cell(2,1);
 %
 % fit_ellipse - finds the best fit to an ellipse for the given set of points.
 %
@@ -266,5 +267,17 @@ if (nargin>2) & ~isempty( axis_handle ) & (test>0)
     plot( new_ver_line(1,:),new_ver_line(2,:), 'Color', colour );
     plot( new_horz_line(1,:),new_horz_line(2,:), 'Color', colour );
     plot( rotated_ellipse(1,:),rotated_ellipse(2,:), 'Color', colour );
+%     A{2} = axis_handle;
     set( axis_handle,'NextPlot',hold_state );
+%     plot_handle = axis_handle;
+    eccentricity = sqrt(ellipse_t.long_axis*ellipse_t.long_axis - ellipse_t.short_axis*ellipse_t.short_axis)/ellipse_t.long_axis;
+    A{2} = eccentricity;
+%     legendText = "e: " + eccentricity;
+%     legend(axis_handle, legendText)
+%  We have eccentricity.
+%  Also need to put target depth into legend.
+%  And we have the plot handles
+%    legend(axis_handle, 
+    A{1} = ellipse_t;
+    
 end

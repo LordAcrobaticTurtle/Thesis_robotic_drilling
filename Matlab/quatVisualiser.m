@@ -23,7 +23,7 @@ opts.ExtraColumnsRule = "ignore";
 opts.EmptyLineRule = "read";
 
 % Import the data
-IMU = readtable("B:\Uni\Thesis\Thesis_robotic_drilling\log_data\07-10-22-18-37-56.csv", opts);
+IMU = readtable("B:\Uni\Thesis\Thesis_robotic_drilling\log_data\old\07-10-22-18-37-56.csv", opts);
 
 
 %% Process data
@@ -51,10 +51,10 @@ for i=1:dims(1)
    % We now have a rotated current vector
    currVector = quatrotate(currQuat, oldVector);
    % Make a line of points between it and 0,0,0
-   x = linspace(currVector(1),0);
-   y = linspace(currVector(2),0);
-   z = linspace(currVector(3),0);
-   set(h, 'xdata', x, 'ydata', y, 'zdata', z)
+%    x = linspace(currVector(1),0);
+%    y = linspace(currVector(2),0);
+%    z = linspace(currVector(3),0);
+%    set(h, 'xdata', x, 'ydata', y, 'zdata', z)
    disp(currVector)
    oldVector = currVector;
 end 
